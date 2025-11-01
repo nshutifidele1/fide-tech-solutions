@@ -28,131 +28,42 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Allows anyone to read product information, but restricts creation, updates, and deletion.
-     * @path /products/{productId}
-     * @allow (get, list): if true
-     * @deny (create, update, delete): if false
-     * @principle Public read, restricted write.
-     */
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
     match /products/{productId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read;
+      allow write: if false;
     }
 
-    /**
-     * @description Controls access to user profile information. Only the user and admins can read/write.
-     * @path /users/{userId}
-     * @allow (get, update, delete): if request.auth != null && (request.auth.uid == userId || isAdmin())
-     * @allow create: if request.auth != null
-     * @deny (create, update, delete): if request.auth == null || (request.auth.uid != userId && !isAdmin())
-     * @principle Enforces user-ownership for writes, admin override.
-     */
     match /users/{userId} {
-      allow get: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow list: if false;
+      allow read, update, delete: if isOwner(userId) || isAdmin();
       allow create: if request.auth != null;
-      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow list: if false;
     }
 
-    /**
-     * @description Restricts access to cart items to the owning user.
-     * @path /users/{userId}/cart_items/{cartItemId}
-     * @allow (get, list, create, update, delete): if request.auth != null && request.auth.uid == userId
-     * @deny (get, list, create, update, delete): if request.auth == null || request.auth.uid != userId
-     * @principle Enforces user-ownership for writes.
-     */
-    match /users/{userId}/cart_items/{cartItemId} {
-      allow get: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+    match /users/{userId}/{path=**} {
+        allow read, write: if isOwner(userId);
     }
-
-    /**
-     * @description Restricts access to order history to the owning user.
-     * @path /users/{userId}/orders/{orderId}
-     * @allow (get, list, create, update, delete): if request.auth != null && request.auth.uid == userId
-     * @deny (get, list, create, update, delete): if request.auth == null || request.auth.uid != userId
-     * @principle Enforces user-ownership for writes.
-     */
-    match /users/{userId}/orders/{orderId} {
-      allow get: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
-    }
-
-        /**
-     * @description Restricts access to order items to the owning order.
-     * @path /orders/{orderId}/order_items/{orderItemId}
-     * @allow (get, list, create, update, delete): if false; // No direct access
-     * @deny (get, list, create, update, delete): if true
-     */
+    
     match /orders/{orderId}/order_items/{orderItemId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read, write: if false; 
     }
 
-    /**
-     * @description Restricts access to product reviews to the owning user.
-     * @path /users/{userId}/reviews/{reviewId}
-     * @allow (get, list, create, update, delete): if request.auth != null && request.auth.uid == userId
-     * @deny (get, list, create, update, delete): if request.auth == null || request.auth.uid != userId
-     * @principle Enforces user-ownership for writes.
-     */
-    match /users/{userId}/reviews/{reviewId} {
-      allow get: if request.auth != null && request.auth.uid == userId;
-      allow list: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
-    }
-
-    /**
-     * @description Allows anyone to create a newsletter subscription, but restricts reading and modification.
-     * @path /newsletter_subscriptions/{subscriptionId}
-     * @allow create: if true
-     * @deny (get, list, update, delete): if false
-     * @principle Public create, restricted access.
-     */
     match /newsletter_subscriptions/{subscriptionId} {
-      allow get: if false;
-      allow list: if false;
       allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow read, update, delete: if false;
     }
 
-     /**
-      * @description Grants admin privileges to users with a document present in this collection.
-      * @path /roles_admin/{userId}
-      */
-     match /roles_admin/{userId} {
-        allow get: if request.auth != null && request.auth.uid == userId;
-        allow list: if isAdmin();
-        allow create: if isAdmin();
-        allow update: if false;
-        allow delete: if isAdmin();
-     }
-
-  }
-
-  // Helper functions
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  function isAdmin() {
-    return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    match /roles_admin/{userId} {
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list, create, delete: if isAdmin();
+      allow update: if false;
+    }
   }
 }
