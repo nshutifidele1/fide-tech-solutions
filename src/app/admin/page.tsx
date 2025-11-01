@@ -4,7 +4,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, DollarSign, Package, ShoppingCart, Users, Bell, Search, PlusCircle } from 'lucide-react';
+import { DollarSign, Package, ShoppingCart, Users } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -15,12 +15,9 @@ import {
 } from "@/components/ui/table"
 import { Badge } from '@/components/ui/badge';
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 export default function AdminDashboard() {
-  const { isAdmin, isLoading: isRoleLoading, user } = useUserRole();
+  const { isAdmin, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,198 +57,135 @@ export default function AdminDashboard() {
     { name: 'May', sales: 6000 },
     { name: 'Jun', sales: 7500 },
   ];
+  
+  const recentOrders = [
+    { id: 'ORD001', customer: 'Liam Johnson', date: '2023-11-23', status: 'Delivered', total: '$250.00' },
+    { id: 'ORD002', customer: 'Olivia Smith', date: '2023-11-22', status: 'Shipped', total: '$150.00' },
+    { id: 'ORD003', customer: 'Noah Williams', date: '2023-11-21', status: 'Delivered', total: '$350.00' },
+    { id: 'ORD004-B', customer: 'Emma Brown', date: '2023-11-20', status: 'Pending', total: '$450.00' },
+    { id: 'ORD005', customer: 'Ava Jones', date: '2023-11-19', status: 'Delivered', total: '$550.00' },
+  ]
 
   return (
     <div className="flex-1 p-8">
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Hello, {user?.displayName || 'Admin'}</h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search..." className="pl-9 bg-background" />
-          </div>
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
-        </div>
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <p className="text-muted-foreground">An overview of your store's performance.</p>
       </header>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-          <Card className="bg-primary/10 border-primary/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Balance</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-3xl font-bold">$18,345</div>
-                <p className="text-xs text-muted-foreground">November 2022</p>
-            </CardContent>
-          </Card>
-           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Income</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-3xl font-bold">$15,634</div>
-                <p className="text-xs text-muted-foreground">November 2022</p>
-            </CardContent>
-          </Card>
-           <Card className="bg-pink-100/30 dark:bg-pink-900/20 border-pink-500/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Expenses</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-3xl font-bold">$12,643</div>
-                <p className="text-xs text-muted-foreground">November 2022</p>
-            </CardContent>
-          </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Orders</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+2350</div>
+            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">New Customers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+123</div>
+            <p className="text-xs text-muted-foreground">+19% from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Products in Stock</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">296</div>
+            <p className="text-xs text-muted-foreground">Total active products</p>
+          </CardContent>
+        </Card>
       </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-           <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Create Invoice</CardTitle>
-                      <Button variant="ghost" size="icon">
-                        <PlusCircle className="h-6 w-6"/>
-                      </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">Latest Transaction</p>
-                    <div className="flex gap-4 mb-8">
-                       <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-                           <Avatar className="h-8 w-8">
-                               <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" />
-                               <AvatarFallback>JR</AvatarFallback>
-                           </Avatar>
-                           <div>
-                               <p className="text-sm font-medium">James Robert</p>
-                               <p className="text-xs text-muted-foreground">jamesrobert@gmail.com</p>
-                           </div>
-                       </div>
-                        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-                           <Avatar className="h-8 w-8">
-                               <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704e" />
-                               <AvatarFallback>JR</AvatarFallback>
-                           </Avatar>
-                           <div>
-                               <p className="text-sm font-medium">James Robert</p>
-                               <p className="text-xs text-muted-foreground">jamesrobert@gmail.com</p>
-                           </div>
-                       </div>
-                       <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-                           <Avatar className="h-8 w-8">
-                               <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704f" />
-                               <AvatarFallback>JR</AvatarFallback>
-                           </Avatar>
-                           <div>
-                               <p className="text-sm font-medium">James Robert</p>
-                               <p className="text-xs text-muted-foreground">jamesrobert@gmail.com</p>
-                           </div>
-                       </div>
-                    </div>
-                    <form className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
-                           <Input placeholder="Customer name" />
-                           <Input type="email" placeholder="Customer email" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-6">
-                           <Input placeholder="Item name" />
-                           <Input placeholder="Item amount" type="number" />
-                        </div>
-                        <div className="flex justify-between items-center gap-4">
-                            <Button variant="outline">Add more details</Button>
-                            <Button className="bg-foreground text-background hover:bg-foreground/80">Send Money</Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Sales Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="pl-2">
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={salesData}>
+                  <defs>
+                    <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--background))",
+                      borderColor: "hsl(var(--border))",
+                    }}
+                  />
+                  <Area type="monotone" dataKey="sales" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorSales)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </div>
-        <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Cards</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-black text-white rounded-xl p-6 space-y-8 relative overflow-hidden">
-                    <div className="flex justify-between items-start">
-                        <p className="font-medium">John Demin</p>
-                        <svg width="35" height="22" viewBox="0 0 35 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M34.5 11.24C34.5 17.18 26.78 22 17.25 22C7.72 22 0 17.18 0 11.24C0 5.3 7.72 0.5 17.25 0.5C26.78 0.5 34.5 5.3 34.5 11.24Z" fill="white" fillOpacity="0.2"/>
-                        </svg>
-                    </div>
-                    <p className="text-3xl font-bold tracking-wider">$34,856.00</p>
-                    <div className="flex justify-between items-end">
-                        <p className="font-mono text-sm">3459 **** **** 4356</p>
-                        <p className="text-xs">12/20 - 124</p>
-                    </div>
-                    <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-gradient-to-tr from-purple-400 to-pink-400 opacity-50" />
-                </div>
-              </CardContent>
-            </Card>
-             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Transaction history</CardTitle>
-                <Button variant="link" size="sm">View All</Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarImage src="https://i.pravatar.cc/150?u=tinder" />
-                                <AvatarFallback>T</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold">Tinder</p>
-                                <p className="text-sm text-muted-foreground">05 November 2022 at 7:30 PM</p>
-                            </div>
-                        </div>
-                        <p className="font-semibold">$120.00</p>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-10 w-10 border">
-                                 <AvatarImage src="https://i.pravatar.cc/150?u=mailchimp" />
-                                <AvatarFallback>M</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold">Mainchimp</p>
-                                <p className="text-sm text-muted-foreground">10 November 2022 at 3:30 PM</p>
-                            </div>
-                        </div>
-                        <p className="font-semibold">$230.00</p>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-10 w-10 border">
-                                 <AvatarImage src="https://i.pravatar.cc/150?u=github" />
-                                <AvatarFallback>G</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold">Github</p>
-                                <p className="text-sm text-muted-foreground">15 November 2022 at 11:30 PM</p>
-                            </div>
-                        </div>
-                        <p className="font-semibold">$134.00</p>
-                    </div>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-10 w-10 border">
-                                 <AvatarImage src="https://i.pravatar.cc/150?u=spotify" />
-                                <AvatarFallback>S</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold">Spotify</p>
-                                <p className="text-sm text-muted-foreground">20 November 2022 at 10:30 PM</p>
-                            </div>
-                        </div>
-                        <p className="font-semibold">$432.00</p>
-                    </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <div className="font-medium">{order.customer}</div>
+                        <div className="text-sm text-muted-foreground">{order.date}</div>
+                      </TableCell>
+                      <TableCell>{order.total}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            order.status === 'Delivered' ? 'default' : 
+                            order.status === 'Shipped' ? 'secondary' : 
+                            'outline'
+                          }
+                          className={order.status === 'Delivered' ? 'bg-green-500/20 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-500/30' : ''}
+                        >
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
