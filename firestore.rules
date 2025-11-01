@@ -138,7 +138,7 @@ service cloud.firestore {
       * @path /roles_admin/{userId}
       */
      match /roles_admin/{userId} {
-        allow get: if isSignedIn() && isOwner(userId);
+        allow get: if request.auth != null && request.auth.uid == userId;
         allow list: if false;
         allow create: if isAdmin();
         allow update: if false;
