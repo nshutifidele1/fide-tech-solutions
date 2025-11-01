@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Menu, User as UserIcon, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu, User as UserIcon, LogOut, Shield } from 'lucide-react';
 import { NAV_LINKS } from '@/lib/constants';
 import { useCart } from '@/hooks/use-cart';
 import Logo from '@/components/common/Logo';
@@ -25,10 +25,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { getAuth } from 'firebase/auth';
+import { useUserRole } from '@/hooks/use-user-role';
 
 export default function Header() {
   const { cartCount } = useCart();
   const { user, isUserLoading } = useUser();
+  const { isAdmin } = useUserRole();
   const auth = useAuth();
 
   const handleLogout = () => {
@@ -75,6 +77,16 @@ export default function Header() {
                       </Link>
                     </SheetClose>
                   ))}
+                   {isAdmin && (
+                     <SheetClose asChild>
+                      <Link
+                        href="/admin"
+                        className="rounded-md px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      >
+                        Admin
+                      </Link>
+                    </SheetClose>
+                  )}
                 </nav>
               </div>
             </SheetContent>
@@ -95,6 +107,15 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+             {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1"
+              >
+                <Shield size={16} />
+                Admin
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-2">
