@@ -44,6 +44,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const auth = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   React.useEffect(() => {
     if (!auth) return;
