@@ -34,6 +34,11 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
+           <div className="mt-2 text-center text-sm">
+            <Link href="/admin" className="underline">
+              Admin Dashboard
+            </Link>
+          </div>
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
