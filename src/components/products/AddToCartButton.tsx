@@ -1,9 +1,11 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/firebase';
 import type { Product } from '@/lib/types';
 
 type AddToCartButtonProps = {
@@ -15,8 +17,20 @@ type AddToCartButtonProps = {
 export default function AddToCartButton({ product, quantity = 1, className }: AddToCartButtonProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { user } = useUser();
+  const router = useRouter();
 
   const handleAddToCart = () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'You need to be logged in to add items to your cart.',
+      });
+      router.push('/login');
+      return;
+    }
+    
     addToCart(product, quantity);
     toast({
       title: 'Added to cart',
