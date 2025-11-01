@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, LineChart, Package, ShoppingCart, Users } from 'lucide-react';
 import {
@@ -18,16 +17,31 @@ import { Badge } from '@/components/ui/badge';
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 
 export default function AdminDashboard() {
-  const { isAdmin, isLoading, user } = useUserRole();
+  const { isAdmin, isLoading: isRoleLoading, user } = useUserRole();
   const router = useRouter();
+  const [isVerified, setIsVerified] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoading && !isAdmin) {
-      router.push('/');
-    }
-  }, [isAdmin, isLoading, router]);
+    if (isRoleLoading) return;
 
-  if (isLoading || !isAdmin) {
+    try {
+      const secretVerified = sessionStorage.getItem('admin-secret-verified') === 'true';
+      if (!secretVerified) {
+        router.replace('/admin/secret');
+      } else if (!isAdmin) {
+        router.replace('/');
+      } else {
+        setIsVerified(true);
+      }
+    } catch (error) {
+       router.replace('/admin/secret');
+    } finally {
+       setIsLoading(false);
+    }
+  }, [isAdmin, isRoleLoading, router]);
+
+  if (isLoading || isRoleLoading || !isVerified || !isAdmin) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p>Loading...</p>
