@@ -6,8 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 export const metadata = {
-  title: 'Contact Us - NetTech Solutions',
-  description: 'Get in touch with NetTech Solutions for support, sales, or any inquiries.',
+  title: 'Contact Us - Setso',
+  description: 'Get in touch with Setso for support, sales, or any inquiries.',
 };
 
 export default function ContactPage() {
@@ -60,8 +60,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Email</h3>
-                <p className="text-muted-foreground">General Inquiries: <a href="mailto:contact@nettech.com" className="text-primary hover:underline">contact@nettech.com</a></p>
-                <p className="text-muted-foreground">Support: <a href="mailto:support@nettech.com" className="text-primary hover:underline">support@nettech.com</a></p>
+                <p className="text-muted-foreground">General Inquiries: <a href="mailto:contact@setso.com" className="text-primary hover:underline">contact@setso.com</a></p>
+                <p className="text-muted-foreground">Support: <a href="mailto:support@setso.com" className="text-primary hover:underline">support@setso.com</a></p>
               </div>
             </div>
              <div className="flex items-start gap-4">

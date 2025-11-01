@@ -5,7 +5,7 @@ import ProductCard from '@/components/products/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const metadata = {
-  title: 'Search Results - NetTech Solutions',
+  title: 'Search Results - Setso',
 };
 
 type SearchPageProps = {

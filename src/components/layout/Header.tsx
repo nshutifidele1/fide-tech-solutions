@@ -1,12 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Menu } from 'lucide-react';
-
+import { ShoppingCart, Menu, User as UserIcon, LogOut } from 'lucide-react';
 import { NAV_LINKS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
-
 import Logo from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import SearchController from '@/components/search/SearchController';
@@ -17,9 +14,34 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth, useUser } from '@/firebase';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { getAuth } from 'firebase/auth';
 
 export default function Header() {
   const { cartCount } = useCart();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    if (auth) {
+      auth.signOut();
+    }
+  };
+  
+  const getInitials = (email: string | null | undefined) => {
+    if (!email) return 'U';
+    return email.substring(0, 2).toUpperCase();
+  };
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -75,7 +97,7 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button asChild variant="ghost" size="icon">
               <Link href="/cart">
@@ -88,6 +110,39 @@ export default function Header() {
                 <span className="sr-only">Shopping Cart</span>
               </Link>
             </Button>
+             {isUserLoading ? (
+              <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                        <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                      </Avatar>
+                   </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">My Account</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

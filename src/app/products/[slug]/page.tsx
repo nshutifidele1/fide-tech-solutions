@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
     return { title: 'Product Not Found' };
   }
   return {
-    title: `${product.name} - NetTech Solutions`,
+    title: `${product.name} - Setso`,
     description: product.description,
   };
 }

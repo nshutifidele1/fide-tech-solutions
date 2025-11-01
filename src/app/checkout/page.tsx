@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 export const metadata = {
-  title: 'Checkout - NetTech Solutions',
+  title: 'Checkout - Setso',
 };
 
 export default function CheckoutPage() {

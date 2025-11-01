@@ -2,7 +2,7 @@ import { getProducts } from '@/lib/products';
 import ProductCard from '@/components/products/ProductCard';
 
 export const metadata = {
-  title: 'All Products - NetTech Solutions',
+  title: 'All Products - Setso',
   description: 'Browse our full catalog of computers, routers, switches, and more.',
 };
 

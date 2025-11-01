@@ -78,7 +78,7 @@ export default function Footer() {
 
         <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} NetTech Solutions. All Rights Reserved.
+            &copy; {new Date().getFullYear()} Setso. All Rights Reserved.
           </p>
           <div className="flex space-x-4">
             <Link href="#" className="text-muted-foreground hover:text-foreground">

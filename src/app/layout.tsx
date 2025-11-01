@@ -5,9 +5,10 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { CartProvider } from '@/hooks/use-cart';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'NetTech Solutions',
+  title: 'Setso',
   description: 'Your one-stop shop for computers, networking, and tech devices.',
 };
 
@@ -33,14 +34,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CartProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </div>
-            <Toaster />
-          </CartProvider>
+          <FirebaseClientProvider>
+            <CartProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+            </CartProvider>
+          </FirebaseClientProvider>
         </ThemeProvider>
       </body>
     </html>

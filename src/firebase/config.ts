@@ -1,8 +1,9 @@
 export const firebaseConfig = {
-  "projectId": "studio-2025717843-fcd9d",
-  "appId": "1:990673220131:web:c378c60efef342a981f796",
   "apiKey": "AIzaSyBNyHPG_bsmOVfKP1T--iDaLN888EFwclo",
-  "authDomain": "studio-2025717843-fcd9d.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "990673220131"
+  "authDomain": "nettecksolutions.firebaseapp.com",
+  "projectId": "nettecksolutions",
+  "storageBucket": "nettecksolutions.appspot.com",
+  "messagingSenderId": "876860454731",
+  "appId": "1:876860454731:web:5d3963d04199931f789ace",
+  "measurementId": "G-W3Z0NTXKLY"
 };
