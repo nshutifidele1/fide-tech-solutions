@@ -43,7 +43,15 @@ service cloud.firestore {
       allow list: if false;
     }
 
-    match /users/{userId}/{path=**} {
+    match /users/{userId}/cart_items/{cartItemId} {
+        allow read, write: if request.auth.uid == userId;
+    }
+
+    match /users/{userId}/orders/{orderId} {
+        allow read, write: if request.auth.uid == userId;
+    }
+
+    match /users/{userId}/reviews/{reviewId} {
         allow read, write: if request.auth.uid == userId;
     }
     
