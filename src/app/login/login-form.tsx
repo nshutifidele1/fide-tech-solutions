@@ -7,31 +7,39 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Icons } from '@/components/common/icons';
 import { useAuth } from '@/firebase';
 import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const loginUserSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: z.string().email({ message: 'Please enter a valid email address.' }),
+  password: z.string().min(1, { message: 'Password is required.' }),
 });
 
 type FormData = z.infer<typeof loginUserSchema>;
 
 export function LoginForm({ className, ...props }: LoginFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(loginUserSchema),
+    defaultValues: {
+        email: '',
+        password: '',
+    }
   });
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const auth = useAuth();
@@ -72,56 +80,58 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-2">
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="email">
-              Email
-            </Label>
-            <Input
-              id="email"
-              placeholder="name@example.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              disabled={isLoading}
-              {...register('email')}
-            />
-            {errors?.email && (
-              <p className="px-1 text-xs text-red-600">
-                {errors.email.message}
-              </p>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="name@example.com"
+                    type="email"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    autoCorrect="off"
+                    disabled={isLoading}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="password">
-              Password
-            </Label>
-            <Input
-              id="password"
-              placeholder="password"
-              type="password"
-              autoCapitalize="none"
-              autoComplete="current-password"
-              autoCorrect="off"
-              disabled={isLoading}
-              {...register('password')}
-            />
-            {errors?.password && (
-              <p className="px-1 text-xs text-red-600">
-                {errors.password.message}
-              </p>
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    autoCapitalize="none"
+                    autoComplete="current-password"
+                    autoCorrect="off"
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
-          <button className={cn(buttonVariants())} disabled={isLoading}>
+          />
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
             Sign In with Email
-          </button>
-        </div>
-      </form>
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }
