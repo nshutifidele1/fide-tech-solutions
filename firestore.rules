@@ -1,0 +1,166 @@
+/**
+ * @fileoverview Firestore Security Rules for NetTech Solutions.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a role-based access control system combined with user-ownership for data privacy.
+ * User data and related subcollections (cart items, orders, reviews) are strictly controlled, allowing only the authenticated user and admins access.
+ * Public data, such as product information, is readable by all, but write access is restricted.
+ * Admin privileges, managed via the `/roles_admin/{userId}` collection, grant elevated permissions.
+ *
+ * Data Structure:
+ * - /products/{productId}: Publicly readable product information.
+ * - /users/{userId}: User profile data; write access restricted to the user and admins.
+ * - /users/{userId}/cart_items/{cartItemId}: Cart items owned by the user.
+ * - /users/{userId}/orders/{orderId}: Order history for the user.
+ * - /orders/{orderId}/order_items/{orderItemId}: Items within a specific order.
+ * - /users/{userId}/reviews/{reviewId}: Product reviews created by the user.
+ * - /newsletter_subscriptions/{subscriptionId}: Newsletter subscriptions; publicly creatable, restricted otherwise.
+ * - /roles_admin/{userId}: Indicates admin privileges; presence of a document grants admin status.
+ *
+ * Key Security Decisions:
+ * - User listing is disallowed to protect privacy.
+ * - Admin privileges are checked via document existence in the `/roles_admin/{userId}` collection for simplicity and performance.
+ * - The `isAdmin` field is denormalized into the user document for authorization independence.
+ * - Default security posture is strict: any access not explicitly allowed is denied.
+ * - To create simpler, more performant rules, roles, and ownership are denormalized onto the documents being secured.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows anyone to read product information, but restricts creation, updates, and deletion.
+     * @path /products/{productId}
+     * @allow (get, list): if true
+     * @deny (create, update, delete): if false
+     * @principle Public read, restricted write.
+     */
+    match /products/{productId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Controls access to user profile information. Only the user and admins can read/write.
+     * @path /users/{userId}
+     * @allow (get, update, delete): if isSignedIn() && (isOwner(userId) || isAdmin())
+     * @allow create: if isSignedIn() && isOwner(userId)
+     * @deny (create, update, delete): if !isSignedIn() || (!isOwner(userId) && !isAdmin())
+     * @principle Enforces user-ownership for writes, admin override.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && (isOwner(userId) || isAdmin()) && isExistingOwner(userId);
+      allow delete: if isSignedIn() && (isOwner(userId) || isAdmin()) && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Restricts access to cart items to the owning user.
+     * @path /users/{userId}/cart_items/{cartItemId}
+     * @allow (get, list, create, update, delete): if isSignedIn() && isOwner(userId)
+     * @deny (get, list, create, update, delete): if !isSignedIn() || !isOwner(userId)
+     * @principle Enforces user-ownership for writes.
+     */
+    match /users/{userId}/cart_items/{cartItemId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Restricts access to order history to the owning user.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow (get, list, create, update, delete): if isSignedIn() && isOwner(userId)
+     * @deny (get, list, create, update, delete): if !isSignedIn() || !isOwner(userId)
+     * @principle Enforces user-ownership for writes.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+    }
+
+        /**
+     * @description Restricts access to order items to the owning order.
+     * @path /orders/{orderId}/order_items/{orderItemId}
+     * @allow (get, list, create, update, delete): if false; // No direct access
+     * @deny (get, list, create, update, delete): if true
+     */
+    match /orders/{orderId}/order_items/{orderItemId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Restricts access to product reviews to the owning user.
+     * @path /users/{userId}/reviews/{reviewId}
+     * @allow (get, list, create, update, delete): if isSignedIn() && isOwner(userId)
+     * @deny (get, list, create, update, delete): if !isSignedIn() || !isOwner(userId)
+     * @principle Enforces user-ownership for writes.
+     */
+    match /users/{userId}/reviews/{reviewId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows anyone to create a newsletter subscription, but restricts reading and modification.
+     * @path /newsletter_subscriptions/{subscriptionId}
+     * @allow create: if true
+     * @deny (get, list, update, delete): if false
+     * @principle Public create, restricted access.
+     */
+    match /newsletter_subscriptions/{subscriptionId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+     /**
+      * @description Grants admin privileges to users with a document present in this collection.
+      * @path /roles_admin/{userId}
+      */
+     match /roles_admin/{userId} {
+        allow get: if isAdmin();
+        allow list: if false;
+        allow create: if isAdmin();
+        allow update: if false;
+        allow delete: if isAdmin();
+     }
+
+  }
+
+  // Helper functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+  function isAdmin() {
+       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+  }
+
+  function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
+  }
+}
