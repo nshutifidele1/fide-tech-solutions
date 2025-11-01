@@ -1,3 +1,178 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "A modern and clean desk setup with multiple monitors and glowing keyboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkZXNrJTIwc2V0dXB8ZW58MHx8fHwxNzYxOTU1MjgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "desk setup"
+    },
+    {
+      "id": "about-1",
+      "description": "A team of engineers collaborating around a table with laptops and hardware.",
+      "imageUrl": "https://images.unsplash.com/photo-1622675363311-3e1904dc1885?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0ZWFtJTIwY29sbGFib3JhdGlvbnxlbnwwfHx8fDE3NjE5NTEwODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "team collaboration"
+    },
+    {
+      "id": "computer-1",
+      "description": "Front view of the QuantumCore i9 Gaming Desktop with RGB lighting.",
+      "imageUrl": "https://images.unsplash.com/photo-1587202372583-49330a15584d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxnYW1pbmclMjBjb21wdXRlcnxlbnwwfHx8fDE3NjE5OTc2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gaming computer"
+    },
+    {
+      "id": "computer-1-gallery-1",
+      "description": "Side view of the QuantumCore i9 Gaming Desktop showing internal components.",
+      "imageUrl": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb21wdXRlciUyMGludGVybmFsc3xlbnwwfHx8fDE3NjE5OTc2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer internals"
+    },
+    {
+      "id": "computer-1-gallery-2",
+      "description": "Close-up of the liquid cooling system on the QuantumCore i9.",
+      "imageUrl": "https://images.unsplash.com/photo-1576400883215-7083980b6193?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsaXF1aWQlMjBjb29saW5nfGVufDB8fHx8MTc2MTk5NzY1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "liquid cooling"
+    },
+    {
+      "id": "computer-1-gallery-3",
+      "description": "Rear view of the QuantumCore i9 showing the I/O ports.",
+      "imageUrl": "https://images.unsplash.com/photo-1758159234965-9d259875cf35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHBvcnRzfGVufDB8fHx8MTc2MTk5NzY1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer ports"
+    },
+    {
+      "id": "router-1",
+      "description": "Sleek, white NovaMesh WiFi 6E Router on a modern table.",
+      "imageUrl": "https://images.unsplash.com/photo-1621685634155-dcb444e2ec98?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3aWZpJTIwcm91dGVyfGVufDB8fHx8MTc2MTkyMzQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wifi router"
+    },
+    {
+      "id": "router-1-gallery-1",
+      "description": "Top view of the NovaMesh router showing ventilation.",
+      "imageUrl": "https://images.unsplash.com/photo-1702895742107-35bebf49ce8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyb3V0ZXIlMjB0b3B8ZW58MHx8fHwxNzYxOTk3NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "router top"
+    },
+    {
+      "id": "router-1-gallery-2",
+      "description": "Lifestyle shot of the router in a living room.",
+      "imageUrl": "https://images.unsplash.com/photo-1647314853926-9def39bb32c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxyb3V0ZXIlMjBob21lfGVufDB8fHx8MTc2MTk5NzY1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "router home"
+    },
+    {
+      "id": "router-1-gallery-3",
+      "description": "Back view of the NovaMesh router showing network ports.",
+      "imageUrl": "https://images.unsplash.com/photo-1725983292053-6cd7449e228e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyb3V0ZXIlMjBwb3J0c3xlbnwwfHx8fDE3NjE5OTc2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "router ports"
+    },
+    {
+      "id": "switch-1",
+      "description": "Front view of the Synapse 24-Port Gigabit Switch with all ports visible.",
+      "imageUrl": "https://images.unsplash.com/photo-1551703599-586c565bba02?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxuZXR3b3JrJTIwc3dpdGNofGVufDB8fHx8MTc2MTkyMzQ4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "network switch"
+    },
+    {
+      "id": "switch-1-gallery-1",
+      "description": "Angled view of the Synapse switch.",
+      "imageUrl": "https://images.unsplash.com/photo-1582954820640-42c30eeabe35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bmV0d29yayUyMHN3aXRjaHxlbnwwfHx8fDE3NjE5MjM0ODF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "network switch"
+    },
+    {
+      "id": "switch-1-gallery-2",
+      "description": "The switch mounted in a server rack.",
+      "imageUrl": "https://images.unsplash.com/photo-1591808216268-ce0b82787efe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzZXJ2ZXIlMjByYWNrfGVufDB8fHx8MTc2MTk5NzY1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "server rack"
+    },
+    {
+      "id": "switch-1-gallery-3",
+      "description": "Close up of the LED indicator lights on the switch.",
+      "imageUrl": "https://images.unsplash.com/photo-1561794919-75618574e915?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsZWQlMjBsaWdodHN8ZW58MHx8fHwxNzYxOTM1Nzc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "led lights"
+    },
+    {
+      "id": "laptop-1",
+      "description": "Open AeroBook Pro laptop showing the screen and keyboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1516193760437-921ec3701677?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxsYXB0b3AlMjBvcGVufGVufDB8fHx8MTc2MTkwMDIyMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop open"
+    },
+    {
+      "id": "laptop-1-gallery-1",
+      "description": "Side profile of the thin AeroBook Pro.",
+      "imageUrl": "https://images.unsplash.com/photo-1653976499575-6aacb2644727?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxsYXB0b3AlMjBzaWRlfGVufDB8fHx8MTc2MTkxNjQ4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop side"
+    },
+    {
+      "id": "laptop-1-gallery-2",
+      "description": "AeroBook Pro on a desk with coffee.",
+      "imageUrl": "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsYXB0b3AlMjBkZXNrfGVufDB8fHx8MTc2MTk1MTMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop desk"
+    },
+    {
+      "id": "laptop-1-gallery-3",
+      "description": "Close up on the AeroBook Pro's keyboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1551533257-19e98f46a429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsYXB0b3AlMjBrZXlib2FyZHxlbnwwfHx8fDE3NjE4OTI1OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop keyboard"
+    },
+    {
+      "id": "gadget-1",
+      "description": "ConnectAll USB-C Hub with various cables plugged in.",
+      "imageUrl": "https://images.unsplash.com/photo-1760462787828-ad5b29cafb30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx1c2IlMjBodWJ8ZW58MHx8fHwxNzYxOTA0MzcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "usb hub"
+    },
+    {
+      "id": "gadget-1-gallery-1",
+      "description": "Top down view of the ConnectAll hub.",
+      "imageUrl": "https://images.unsplash.com/photo-1760462788777-1da1518643c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx1c2IlMjBodWJ8ZW58MHx8fHwxNzYxOTA0MzcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "usb hub"
+    },
+    {
+      "id": "gadget-1-gallery-2",
+      "description": "The hub connected to a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1620233389768-4eafd182841a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsYXB0b3AlMjBodWJ8ZW58MHx8fHwxNzYxOTk3NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop hub"
+    },
+    {
+      "id": "gadget-1-gallery-3",
+      "description": "The compact hub in a hand.",
+      "imageUrl": "https://images.unsplash.com/photo-1760462787828-ad5b29cafb30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aHViJTIwcG9ydGFibGV8ZW58MHx8fHwxNzYxOTk3NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hub portable"
+    },
+    {
+      "id": "networking-1",
+      "description": "Guardian NAS 4-Bay device in a home office setting.",
+      "imageUrl": "https://picsum.photos/seed/net1/600/600",
+      "imageHint": "nas device"
+    },
+    {
+      "id": "networking-1-gallery-1",
+      "description": "Front view of the Guardian NAS showing drive bays.",
+      "imageUrl": "https://picsum.photos/seed/net1g1/600/600",
+      "imageHint": "nas bays"
+    },
+    {
+      "id": "networking-1-gallery-2",
+      "description": "Back view of the Guardian NAS showing ports and fan.",
+      "imageUrl": "https://images.unsplash.com/photo-1614172208291-462c7e86adb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxuYXMlMjBwb3J0c3xlbnwwfHx8fDE3NjE5OTc2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "nas ports"
+    },
+    {
+      "id": "networking-1-gallery-3",
+      "description": "The Guardian NAS on a shelf next to a router.",
+      "imageUrl": "https://picsum.photos/seed/net1g3/600/600",
+      "imageHint": "nas setup"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "Portrait of a professional woman in an office.",
+      "imageUrl": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwcm9mZXNzaW9uYWwlMjB3b21hbnxlbnwwfHx8fDE3NjE4ODUwNTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional woman"
+    },
+    {
+      "id": "testimonial-2",
+      "description": "Portrait of a creative man with headphones.",
+      "imageUrl": "https://images.unsplash.com/photo-1615226174592-eff66cc4402f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjcmVhdGl2ZSUyMG1hbnxlbnwwfHx8fDE3NjE5ODc4ODd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "creative man"
+    },
+    {
+      "id": "testimonial-3",
+      "description": "Portrait of a smiling woman in a small shop.",
+      "imageUrl": "https://images.unsplash.com/photo-1595475716260-0f2c35f5a40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMG93bmVyfGVufDB8fHx8MTc2MTk5NzY1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "business owner"
+    }
+  ]
 }
