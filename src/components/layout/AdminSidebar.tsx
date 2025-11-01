@@ -28,13 +28,11 @@ const navLinks = [
   { href: '/admin/transactions', label: 'Transactions', icon: LineChart },
   { href: '/admin/payment', label: 'Payment', icon: ShoppingCart },
   { href: '/admin/inbox', label: 'Inbox', icon: MessageSquare },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-  { href: '/admin/history', label: 'History', icon: History },
 ];
 
 const helpLinks = [
+    { href: '/admin/settings', label: 'Settings', icon: Settings },
     { href: '/admin/support', label: 'Support', icon: LifeBuoy },
-    { href: '/admin/community', label: 'Community', icon: Users2 },
 ]
 
 export default function AdminSidebar() {
@@ -43,25 +41,26 @@ export default function AdminSidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-64 border-r bg-background">
-      <div className="p-4">
+      <div className="p-6">
         <Logo />
       </div>
-      <div className="p-4 mb-4 border-y">
-        <div className="flex items-center gap-3">
+      <div className="p-4 mb-4">
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-muted">
           <Avatar className="h-10 w-10">
             <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'Admin'} />
             <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div>
-            <p className="font-semibold">{user?.displayName || 'James Robert'}</p>
-            <p className="text-xs text-muted-foreground">{user?.email || 'jamesrobert@gmail.com'}</p>
+          <div className='overflow-hidden'>
+            <p className="font-semibold truncate">{user?.displayName || 'James Robert'}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email || 'jamesrobert@gmail.com'}</p>
           </div>
-          <Button variant="ghost" size="icon" className="ml-auto">
+          <Button variant="ghost" size="icon" className="ml-auto flex-shrink-0">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </div>
       </div>
-      <nav className="flex-1 px-4 space-y-2">
+      <nav className="flex-1 px-4 space-y-1">
+        <p className="px-3 py-2 text-xs font-semibold text-muted-foreground">Menu</p>
         {navLinks.map((link) => (
           <Link
             key={link.href}
@@ -76,7 +75,8 @@ export default function AdminSidebar() {
           </Link>
         ))}
       </nav>
-      <div className="mt-auto p-4 space-y-2">
+      <div className="mt-auto p-4 space-y-1">
+         <p className="px-3 py-2 text-xs font-semibold text-muted-foreground">Help</p>
          {helpLinks.map((link) => (
           <Link
             key={link.href}
