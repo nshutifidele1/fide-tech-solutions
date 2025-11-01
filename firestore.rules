@@ -46,47 +46,47 @@ service cloud.firestore {
     /**
      * @description Controls access to user profile information. Only the user and admins can read/write.
      * @path /users/{userId}
-     * @allow (get, update, delete): if isSignedIn() && (isOwner(userId) || isAdmin())
-     * @allow create: if isSignedIn()
-     * @deny (create, update, delete): if !isSignedIn() || (!isOwner(userId) && !isAdmin())
+     * @allow (get, update, delete): if request.auth != null && (request.auth.uid == userId || isAdmin())
+     * @allow create: if request.auth != null
+     * @deny (create, update, delete): if request.auth == null || (request.auth.uid != userId && !isAdmin())
      * @principle Enforces user-ownership for writes, admin override.
      */
     match /users/{userId} {
-      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow get: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow list: if false;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && (isOwner(userId) || isAdmin()) && isExistingOwner(userId);
-      allow delete: if isSignedIn() && (isOwner(userId) || isAdmin()) && isExistingOwner(userId);
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
 
     /**
      * @description Restricts access to cart items to the owning user.
      * @path /users/{userId}/cart_items/{cartItemId}
-     * @allow (get, list, create, update, delete): if isSignedIn() && isOwner(userId)
-     * @deny (get, list, create, update, delete): if !isSignedIn() || !isOwner(userId)
+     * @allow (get, list, create, update, delete): if request.auth != null && request.auth.uid == userId
+     * @deny (get, list, create, update, delete): if request.auth == null || request.auth.uid != userId
      * @principle Enforces user-ownership for writes.
      */
     match /users/{userId}/cart_items/{cartItemId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
-      allow delete: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     /**
      * @description Restricts access to order history to the owning user.
      * @path /users/{userId}/orders/{orderId}
-     * @allow (get, list, create, update, delete): if isSignedIn() && isOwner(userId)
-     * @deny (get, list, create, update, delete): if !isSignedIn() || !isOwner(userId)
+     * @allow (get, list, create, update, delete): if request.auth != null && request.auth.uid == userId
+     * @deny (get, list, create, update, delete): if request.auth == null || request.auth.uid != userId
      * @principle Enforces user-ownership for writes.
      */
     match /users/{userId}/orders/{orderId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
-      allow delete: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
         /**
@@ -106,16 +106,16 @@ service cloud.firestore {
     /**
      * @description Restricts access to product reviews to the owning user.
      * @path /users/{userId}/reviews/{reviewId}
-     * @allow (get, list, create, update, delete): if isSignedIn() && isOwner(userId)
-     * @deny (get, list, create, update, delete): if !isSignedIn() || !isOwner(userId)
+     * @allow (get, list, create, update, delete): if request.auth != null && request.auth.uid == userId
+     * @deny (get, list, create, update, delete): if request.auth == null || request.auth.uid != userId
      * @principle Enforces user-ownership for writes.
      */
     match /users/{userId}/reviews/{reviewId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
-      allow delete: if isSignedIn() && isOwner(userId) && isExistingOwner(userId);
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     /**
@@ -152,15 +152,7 @@ service cloud.firestore {
     return request.auth != null;
   }
 
-  function isOwner(userId) {
-    return request.auth.uid == userId;
-  }
-
   function isAdmin() {
-       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-  }
-
-  function isExistingOwner(userId) {
-    return isOwner(userId) && resource != null;
+    return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
   }
 }
