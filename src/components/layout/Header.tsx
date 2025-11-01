@@ -16,6 +16,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function Header() {
   const { cartCount } = useCart();
@@ -75,6 +76,7 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center">
+            <ThemeToggle />
             <Button asChild variant="ghost" size="icon">
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
