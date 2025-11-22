@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { notFound, useParams } from 'next/navigation';
+import { useFirestore } from '@/firebase';
 import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
 import StarRating from '@/components/common/StarRating';
 import { Badge } from '@/components/ui/badge';
@@ -13,26 +13,20 @@ import { Separator } from '@/components/ui/separator';
 import type { Product, Review } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
-type ProductPageProps = {
-  params: {
-    slug: string;
-  };
-};
-
-export default function ProductPage({ params }: ProductPageProps) {
+function ProductLoader({ slug }: { slug: string }) {
   const firestore = useFirestore();
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!firestore) return;
+    if (!firestore || !slug) return;
     
     const fetchProduct = async () => {
       setIsLoading(true);
       try {
         const productsRef = collection(firestore, 'products');
-        const q = query(productsRef, where('slug', '==', params.slug));
+        const q = query(productsRef, where('slug', '==', slug));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
@@ -46,7 +40,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
         // Fetch reviews
         if (productData.id) {
-          const reviewsRef = collection(firestore, `products/${productData.id}/reviews`);
+          const reviewsRef = collection(firestore, 'products', productData.id, 'reviews');
           const reviewsSnapshot = await getDocs(reviewsRef);
           const fetchedReviews = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
           setReviews(fetchedReviews);
@@ -54,15 +48,15 @@ export default function ProductPage({ params }: ProductPageProps) {
 
       } catch (error) {
         console.error("Error fetching product:", error);
-        notFound();
+        // notFound(); We might want to show an error component instead
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProduct();
-  }, [firestore, params.slug]);
-
+  }, [firestore, slug]);
+  
   if (isLoading) {
     return (
         <div className="container py-12 md:py-20">
@@ -93,7 +87,9 @@ export default function ProductPage({ params }: ProductPageProps) {
   }
 
   if (!product) {
-    notFound();
+    // This can happen if fetch fails or product is not found after loading.
+    // notFound() is a server-side utility, so we render a message on the client.
+    return <div className="container py-12 text-center">Product not found.</div>;
   }
 
   return (
@@ -182,4 +178,16 @@ export default function ProductPage({ params }: ProductPageProps) {
       </div>
     </div>
   );
+}
+
+
+export default function ProductPage() {
+  const params = useParams();
+  const slug = typeof params.slug === 'string' ? params.slug : '';
+
+  return (
+    <Suspense fallback={<div className="container py-12 text-center">Loading product...</div>}>
+      <ProductLoader slug={slug} />
+    </Suspense>
+  )
 }
