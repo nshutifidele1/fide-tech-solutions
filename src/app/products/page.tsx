@@ -1,18 +1,32 @@
 'use client';
 
+import { useState } from 'react';
 import ProductCard from '@/components/products/ProductCard';
+import ProductFilters from '@/components/products/ProductFilters';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, DocumentData } from 'firebase/firestore';
+import { collection, query, where, DocumentData } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductsPage() {
   const firestore = useFirestore();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
 
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'products'));
-  }, [firestore]);
+
+    let q = query(collection(firestore, 'products'));
+
+    if (selectedCategory) {
+      q = query(q, where('category', '==', selectedCategory));
+    }
+    if (selectedBrand) {
+      q = query(q, where('brand', '==', selectedBrand));
+    }
+    
+    return q;
+  }, [firestore, selectedCategory, selectedBrand]);
 
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
@@ -28,9 +42,14 @@ export default function ProductsPage() {
           </p>
         </div>
 
-        {/* TODO: Add filtering component here */}
-
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+        <ProductFilters
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedBrand={selectedBrand}
+          setSelectedBrand={setSelectedBrand}
+        />
+        
+        <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {isLoading && (
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-2">
@@ -39,6 +58,9 @@ export default function ProductsPage() {
                 <Skeleton className="h-6 w-1/4" />
               </div>
             ))
+          )}
+          {!isLoading && products?.length === 0 && (
+             <p className="text-muted-foreground col-span-full text-center">No products found matching your criteria.</p>
           )}
           {products?.map((product) => (
             <ProductCard key={product.id} product={product} />
