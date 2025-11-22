@@ -1,3 +1,4 @@
+
 import type { Testimonial } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -26,7 +27,7 @@ export const testimonials: Testimonial[] = [
     role: 'IT Manager, Innovate Corp',
     avatar: findImage('testimonial-1', 'about-1'),
     comment:
-      "NetTech Solutions is our go-to for all our networking hardware. Their product selection is top-notch, and the expert advice we received was invaluable in upgrading our office infrastructure. Delivery is always prompt.",
+      "Fide Tech Solutions is our go-to for all our networking hardware. Their product selection is top-notch, and the expert advice we received was invaluable in upgrading our office infrastructure. Delivery is always prompt.",
   },
   {
     id: '2',
@@ -34,7 +35,7 @@ export const testimonials: Testimonial[] = [
     role: 'Freelance Video Editor',
     avatar: findImage('testimonial-2', 'about-1'),
     comment:
-      "I bought my main editing rig from NetTech, and the performance is incredible. The pre-built configurations are thoughtfully put together for professionals, saving me the headache of building it myself.",
+      "I bought my main editing rig from Fide Tech, and the performance is incredible. The pre-built configurations are thoughtfully put together for professionals, saving me the headache of building it myself.",
   },
   {
     id: '3',
