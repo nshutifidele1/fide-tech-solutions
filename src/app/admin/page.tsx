@@ -20,28 +20,28 @@ export default function AdminDashboard() {
   const { isAdmin, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isRoleLoading) return;
+    if (isRoleLoading) return; // Wait until role check is complete
 
     try {
       const secretVerified = sessionStorage.getItem('admin-secret-verified') === 'true';
       if (!secretVerified) {
         router.replace('/admin/secret');
-      } else if (!isAdmin) {
-        router.replace('/');
-      } else {
-        setIsVerified(true);
+        return;
       }
+      if (!isAdmin) {
+        router.replace('/');
+        return;
+      }
+      setIsVerified(true);
     } catch (error) {
+       // This can happen if sessionStorage is not available (e.g., SSR, secure browser settings)
        router.replace('/admin/secret');
-    } finally {
-       setIsLoading(false);
     }
   }, [isAdmin, isRoleLoading, router]);
 
-  if (isLoading || isRoleLoading || !isVerified || !isAdmin) {
+  if (isRoleLoading || !isVerified || !isAdmin) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p>Loading...</p>
