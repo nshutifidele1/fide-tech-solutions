@@ -104,6 +104,9 @@ const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
             value: totalAmount.toFixed(2),
             currency_code: 'USD',
           },
+          payee: {
+            email_address: "nshutifidele1@gmail.com"
+          }
         },
       ],
     });
