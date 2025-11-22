@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useUser, useFirestore } from '@/firebase';
 import { addDoc, collection, doc, getDocs, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +12,7 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { Icons } from '@/components/common/icons';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ContactPage() {
   const { user, isUserLoading } = useUser();
@@ -157,13 +157,17 @@ export default function ContactPage() {
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="subject">Subject</Label>
-              <Input 
-                id="subject" 
-                placeholder="Question about an order"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                disabled={isLoading}
-              />
+              <Select onValueChange={setSubject} value={subject} disabled={isLoading}>
+                <SelectTrigger id="subject">
+                  <SelectValue placeholder="Select a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Computer">Computer</SelectItem>
+                  <SelectItem value="Own Problems">Own Problems</SelectItem>
+                  <SelectItem value="General Inquiry">General Inquiry</SelectItem>
+                  <SelectItem value="Order Support">Order Support</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
