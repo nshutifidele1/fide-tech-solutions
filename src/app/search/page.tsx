@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { intelligentProductSearch } from '@/ai/flows/intelligent-product-search';
 import ProductCard from '@/components/products/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { collection, getDocs, query, where, DocumentData } from 'firebase/firestore';
+import { collection, getDocs, query, where, DocumentData, or } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
 
@@ -19,25 +19,59 @@ type SearchPageProps = {
 
 async function SearchResults({ query: searchQuery }: { query: string }) {
   const { firestore } = initializeFirebase();
-  let productNames: string[] = [];
-
-  try {
-    const result = await intelligentProductSearch({ query: searchQuery });
-    productNames = result.products;
-  } catch (error) {
-    console.error('AI search failed:', error);
-  }
-
   let foundProducts: Product[] = [];
-  if (productNames.length > 0) {
-     const productsRef = collection(firestore, 'products');
-     // Firestore 'in' query is limited to 30 elements.
-     const q = query(productsRef, where('name', 'in', productNames.slice(0, 30)));
-     const querySnapshot = await getDocs(q);
-     foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-  } else {
-    // Fallback for when AI returns no specific product names
-    const productsRef = collection(firestore, 'products');
+  let searchStrategy = 'full-text';
+
+  // --- Strategy 1: Match Brand or Category ---
+  const brandsRef = collection(firestore, 'brands');
+  const categoriesRef = collection(firestore, 'categories');
+  const normalizedQuery = searchQuery.toLowerCase();
+
+  const [brandsSnapshot, categoriesSnapshot] = await Promise.all([
+    getDocs(brandsRef),
+    getDocs(categoriesRef)
+  ]);
+
+  const matchedBrand = brandsSnapshot.docs.find(doc => doc.data().name.toLowerCase() === normalizedQuery);
+  const matchedCategory = categoriesSnapshot.docs.find(doc => doc.data().name.toLowerCase() === normalizedQuery);
+  
+  const productsRef = collection(firestore, 'products');
+
+  if (matchedBrand) {
+    searchStrategy = 'brand';
+    const q = query(productsRef, where('brand', '==', matchedBrand.data().name));
+    const querySnapshot = await getDocs(q);
+    foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  } else if (matchedCategory) {
+    searchStrategy = 'category';
+    const q = query(productsRef, where('category', '==', matchedCategory.data().name));
+    const querySnapshot = await getDocs(q);
+    foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  }
+  
+  // --- Strategy 2: AI-powered search (if no brand/category match) ---
+  if (foundProducts.length === 0) {
+    searchStrategy = 'ai';
+    let productNames: string[] = [];
+    try {
+      const result = await intelligentProductSearch({ query: searchQuery });
+      productNames = result.products;
+    } catch (error) {
+      console.error('AI search failed:', error);
+    }
+    
+    if (productNames.length > 0) {
+       // Firestore 'in' query is limited to 30 elements.
+       const q = query(productsRef, where('name', 'in', productNames.slice(0, 30)));
+       const querySnapshot = await getDocs(q);
+       foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    }
+  }
+  
+    // --- Strategy 3: Fallback full-text search (if other strategies yield no results) ---
+   if (foundProducts.length === 0) {
+    searchStrategy = 'fallback';
+    // This is a simple case-insensitive prefix search. For a real app, a dedicated search service like Algolia or Elasticsearch is better.
     const q = query(productsRef, where('name', '>=', searchQuery), where('name', '<=', searchQuery + '\uf8ff'));
     const querySnapshot = await getDocs(q);
     foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
