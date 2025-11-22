@@ -24,7 +24,7 @@ export default function ContactPage() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user || !firestore) {
@@ -50,90 +50,83 @@ export default function ContactPage() {
 
     const conversationsRef = collection(firestore, 'conversations');
     const q = query(conversationsRef, where('userId', '==', user.uid));
-    
-    const querySnapshot = await getDocs(q).catch((error) => {
-      const contextualError = new FirestorePermissionError({
-        path: 'conversations',
-        operation: 'list',
-      });
-      errorEmitter.emit('permission-error', contextualError);
-      setIsLoading(false);
-      // Return null to indicate failure
-      return null;
-    });
 
-    // If getDocs failed, querySnapshot will be null
-    if (querySnapshot === null) return;
-    
-    let conversationId: string;
-    let isNewConversation = false;
+    // Non-blocking: process the query and then navigate.
+    getDocs(q)
+      .then((querySnapshot) => {
+        let conversationId: string;
+        const fullMessage = `${subject}: ${message}`;
 
-    if (querySnapshot.empty) {
-      isNewConversation = true;
-      const newConversationRef = doc(conversationsRef);
-      conversationId = newConversationRef.id;
-      
-      const conversationData = {
-        userId: user.uid,
-        userEmail: user.email,
-        participants: [user.uid],
-        lastMessage: message,
-        lastMessageAt: serverTimestamp(),
-        lastMessageSenderId: user.uid,
-        isReadByAdmin: false,
-      };
+        if (querySnapshot.empty) {
+          // Create a new conversation
+          const newConversationRef = doc(conversationsRef);
+          conversationId = newConversationRef.id;
+          const conversationData = {
+            userId: user.uid,
+            userEmail: user.email,
+            participants: [user.uid],
+            lastMessage: fullMessage,
+            lastMessageAt: serverTimestamp(),
+            lastMessageSenderId: user.uid,
+            isReadByAdmin: false,
+          };
+          setDoc(newConversationRef, conversationData).catch((error) => {
+            const contextualError = new FirestorePermissionError({
+              path: newConversationRef.path,
+              operation: 'create',
+              requestResourceData: conversationData,
+            });
+            errorEmitter.emit('permission-error', contextualError);
+          });
+        } else {
+          // Use existing conversation and update it
+          conversationId = querySnapshot.docs[0].id;
+          const conversationUpdateData = {
+            lastMessage: fullMessage,
+            lastMessageAt: serverTimestamp(),
+            lastMessageSenderId: user.uid,
+            isReadByAdmin: false,
+          };
+          setDoc(doc(firestore, 'conversations', conversationId), conversationUpdateData, { merge: true }).catch((error) => {
+            const contextualError = new FirestorePermissionError({
+              path: `conversations/${conversationId}`,
+              operation: 'update',
+              requestResourceData: conversationUpdateData,
+            });
+            errorEmitter.emit('permission-error', contextualError);
+          });
+        }
 
-      await setDoc(newConversationRef, conversationData).catch(error => {
+        // Add the new message to the conversation
+        const messagesRef = collection(firestore, 'conversations', conversationId, 'messages');
+        const messageData = {
+          senderId: user.uid,
+          text: fullMessage,
+          timestamp: serverTimestamp(),
+        };
+        addDoc(messagesRef, messageData).catch((error) => {
+          const contextualError = new FirestorePermissionError({
+            path: messagesRef.path,
+            operation: 'create',
+            requestResourceData: messageData,
+          });
+          errorEmitter.emit('permission-error', contextualError);
+        });
+      })
+      .catch((error) => {
         const contextualError = new FirestorePermissionError({
-          path: newConversationRef.path,
-          operation: 'create',
-          requestResourceData: conversationData,
+          path: 'conversations',
+          operation: 'list',
         });
         errorEmitter.emit('permission-error', contextualError);
-        setIsLoading(false);
+        // Do not set isLoading to false here, as we are navigating away.
       });
 
-    } else {
-      conversationId = querySnapshot.docs[0].id;
-    }
-
-    if (isLoading === false) return; // if an error occurred in the setDoc, stop.
-
-    const messagesRef = collection(firestore, 'conversations', conversationId, 'messages');
-    const messageData = {
-      senderId: user.uid,
-      text: `${subject}: ${message}`,
-      timestamp: serverTimestamp(),
-    };
-    await addDoc(messagesRef, messageData).catch(error => {
-      const contextualError = new FirestorePermissionError({
-          path: messagesRef.path,
-          operation: 'create',
-          requestResourceData: messageData,
-        });
-        errorEmitter.emit('permission-error', contextualError);
-    });
-
-    const conversationUpdateData = {
-      lastMessage: message,
-      lastMessageAt: serverTimestamp(),
-      lastMessageSenderId: user.uid,
-      isReadByAdmin: false,
-    };
-    await setDoc(doc(firestore, 'conversations', conversationId), conversationUpdateData, { merge: true }).catch(error => {
-       const contextualError = new FirestorePermissionError({
-          path: `conversations/${conversationId}`,
-          operation: 'update',
-          requestResourceData: conversationUpdateData,
-        });
-        errorEmitter.emit('permission-error', contextualError);
-    });
-
+    // Optimistic UI: Navigate immediately
     toast({
       title: 'Message Sent!',
       description: "We've received your message and will get back to you shortly.",
     });
-
     router.push(`/contact/chat`);
   };
 
