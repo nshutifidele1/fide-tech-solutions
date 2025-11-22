@@ -113,11 +113,6 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
         <h1 className="font-headline text-3xl font-bold tracking-tight text-center md:text-4xl">
           Search Results
         </h1>
-        {query && (
-           <p className="mt-4 text-center text-lg text-muted-foreground">
-            Showing results for: <span className="text-foreground font-semibold">"{query}"</span>
-          </p>
-        )}
       </div>
       
       {query ? (
