@@ -3,7 +3,8 @@ import Link from 'next/link';
 import {
   LayoutDashboard,
   MessageSquare,
-  Package
+  Package,
+  Tags
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ import Logo from '../common/Logo';
 const navLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
+  { href: '/admin/taxonomy', label: 'Taxonomy', icon: Tags },
   { href: '/admin/messages', label: 'Inbox', icon: MessageSquare },
 ];
 
