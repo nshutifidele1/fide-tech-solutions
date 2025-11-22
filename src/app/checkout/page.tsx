@@ -14,9 +14,10 @@ import Link from 'next/link';
 // Use a placeholder for your Stripe publishable key
 const stripePromise = loadStripe('YOUR_STRIPE_PUBLISHABLE_KEY');
 
-// Use a placeholder for your PayPal client ID
+// Use PayPal's "test" client ID for development and testing.
+// You will need to replace this with your actual client ID for production.
 const paypalInitialOptions = {
-  'client-id': 'YOUR_PAYPAL_CLIENT_ID',
+  'client-id': 'test',
   currency: 'USD',
   intent: 'capture',
 };
