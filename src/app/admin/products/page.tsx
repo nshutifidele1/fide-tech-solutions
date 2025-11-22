@@ -43,6 +43,9 @@ import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Icons } from '@/components/common/icons';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
+
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -117,55 +120,63 @@ export default function AdminProductsPage() {
 
   const onSubmit = async (data: ProductFormData) => {
     if (!firestore) return;
-    try {
-      const { imageUrl, ...productData } = data;
-      const imageData = {
-        id: editingProduct?.image.id || new Date().toISOString(),
-        imageUrl: imageUrl,
-        description: data.name,
-        imageHint: data.category.toLowerCase(),
-      };
 
-      if (editingProduct) {
-        // Update existing product
-        const productRef = doc(firestore, 'products', editingProduct.id);
-        await updateDoc(productRef, {
-          ...productData,
-          image: imageData,
+    const { imageUrl, ...productData } = data;
+    const imageData = {
+      id: editingProduct?.image.id || new Date().toISOString(),
+      imageUrl: imageUrl,
+      description: data.name,
+      imageHint: data.category.toLowerCase(),
+    };
+
+    if (editingProduct) {
+      const productRef = doc(firestore, 'products', editingProduct.id);
+      const updatedData = { ...productData, image: imageData };
+      updateDoc(productRef, updatedData).catch(error => {
+        const contextualError = new FirestorePermissionError({
+          path: productRef.path,
+          operation: 'update',
+          requestResourceData: updatedData,
         });
-        toast({ title: 'Success', description: 'Product updated successfully.' });
-      } else {
-        // Add new product
-        const newProductData = {
-          ...productData,
-          slug: data.name.toLowerCase().replace(/\s+/g, '-'),
-          rating: 0,
-          reviewsCount: 0,
-          image: imageData,
-          gallery: [],
-          specifications: {},
-          features: []
-        };
-        await addDoc(collection(firestore, 'products'), newProductData);
-        toast({ title: 'Success', description: 'Product added successfully.' });
-      }
-      setIsDialogOpen(false);
-      setEditingProduct(null);
-    } catch (error) {
-      console.error('Error saving product:', error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to save product.' });
+        errorEmitter.emit('permission-error', contextualError);
+      });
+      toast({ title: 'Success', description: 'Product update initiated.' });
+    } else {
+      const newProductData = {
+        ...productData,
+        slug: data.name.toLowerCase().replace(/\s+/g, '-'),
+        rating: 0,
+        reviewsCount: 0,
+        image: imageData,
+        gallery: [],
+        specifications: {},
+        features: []
+      };
+      addDoc(collection(firestore, 'products'), newProductData).catch(error => {
+         const contextualError = new FirestorePermissionError({
+          path: 'products',
+          operation: 'create',
+          requestResourceData: newProductData,
+        });
+        errorEmitter.emit('permission-error', contextualError);
+      });
+      toast({ title: 'Success', description: 'Product creation initiated.' });
     }
+    setIsDialogOpen(false);
+    setEditingProduct(null);
   };
   
   const handleDeleteProduct = async (productId: string) => {
      if (!firestore) return;
-     try {
-       await deleteDoc(doc(firestore, "products", productId));
-       toast({ title: 'Success', description: 'Product deleted successfully.' });
-     } catch (error) {
-       console.error('Error deleting product:', error);
-       toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete product.' });
-     }
+     const productRef = doc(firestore, "products", productId);
+     deleteDoc(productRef).catch(error => {
+       const contextualError = new FirestorePermissionError({
+          path: productRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', contextualError);
+     });
+     toast({ title: 'Success', description: 'Product deletion initiated.' });
   };
 
 
@@ -342,5 +353,3 @@ export default function AdminProductsPage() {
     </div>
   );
 }
-
-    
