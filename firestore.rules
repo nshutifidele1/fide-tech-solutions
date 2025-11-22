@@ -78,7 +78,7 @@ service cloud.firestore {
 
     match /conversations/{conversationId} {
       allow get: if isParticipant(conversationId) || isAdmin();
-      allow list: if isAdmin(); // Admins can list all conversations
+      allow list: if (request.auth.uid == request.query.filters.userId && request.query.limit <= 1) || isAdmin();
       allow create: if request.auth != null;
       allow update: if isParticipant(conversationId) || isAdmin();
     }
