@@ -146,6 +146,14 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Order)"
         },
+        "userName": {
+          "type": "string",
+          "description": "The name of the user who placed the order (denormalized)."
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "The email of the user who placed the order (denormalized)."
+        },
         "orderDate": {
           "type": "string",
           "description": "The date the order was placed.",
@@ -167,6 +175,8 @@
       "required": [
         "id",
         "userId",
+        "userName",
+        "userEmail",
         "orderDate",
         "totalAmount",
         "shippingAddress",
@@ -528,4 +538,3 @@
     "reasoning": "The Firestore structure is designed to support NetTech Solutions' e-commerce platform, focusing on products, users, orders, reviews, and newsletter subscriptions. Authorization Independence is achieved by storing the `isAdmin` field directly within the user document, eliminating the need for `get()` calls to determine administrative privileges. This approach ensures atomic operations and simplifies security rules. User-owned data (cart items, reviews) is stored in hierarchical paths under the `/users/{userId}` collection, providing clear ownership and simplifying security rules based on the authenticated user's ID. All orders are stored in a top-level `/orders` collection to allow administrators to efficiently query and aggregate revenue data. The structure supports the required QAPs by segregating data based on access needs. User profiles are stored under `/users/{userId}`, ensuring only the user can access their data. Products are stored in a flat `/products` collection, allowing easy listing and filtering for all users. Admin roles are managed through the `isAdmin` field in the user document and existence check on the `/roles_admin/{uid}` collection, making role verification straightforward in security rules. Newsletter subscriptions are stored in the `/newsletter_subscriptions` collection. The addition of a `conversations` collection with a `messages` subcollection enables a real-time chat feature between users and admins, with rules ensuring only participants can access their own messages."
   }
 }
-    

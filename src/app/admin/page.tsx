@@ -4,23 +4,24 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, Package, ShoppingCart, Users, ArrowUpRight } from 'lucide-react';
+import { DollarSign, ShoppingCart, Users } from 'lucide-react';
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, DocumentData } from 'firebase/firestore';
+import { collection, query, DocumentData, orderBy, limit } from 'firebase/firestore';
 
-interface Order {
+interface Order extends DocumentData {
   id: string;
   totalAmount: number;
+  userName: string;
+  userEmail: string;
 }
 
 export default function AdminDashboard() {
@@ -33,6 +34,12 @@ export default function AdminDashboard() {
     if (!firestore || !isAdmin) return null;
     return query(collection(firestore, 'orders'));
   }, [firestore, isAdmin]);
+  
+  const recentOrdersQuery = useMemoFirebase(() => {
+    if (!firestore || !isAdmin) return null;
+    return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'), limit(5));
+  }, [firestore, isAdmin]);
+
 
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || !isAdmin) return null;
@@ -40,6 +47,7 @@ export default function AdminDashboard() {
   }, [firestore, isAdmin]);
 
   const { data: orders, isLoading: ordersLoading } = useCollection<Order>(ordersQuery);
+  const { data: recentOrders, isLoading: recentOrdersLoading } = useCollection<Order>(recentOrdersQuery);
   const { data: users, isLoading: usersLoading } = useCollection<DocumentData>(usersQuery);
 
   const totalRevenue = orders?.reduce((acc, order) => acc + order.totalAmount, 0) ?? 0;
@@ -47,7 +55,7 @@ export default function AdminDashboard() {
 
 
   useEffect(() => {
-    if (isRoleLoading) return; // Wait until role check is complete
+    if (isRoleLoading) return;
 
     try {
       const secretVerified = sessionStorage.getItem('admin-secret-verified') === 'true';
@@ -61,7 +69,6 @@ export default function AdminDashboard() {
       }
       setIsVerified(true);
     } catch (error) {
-       // This can happen if sessionStorage is not available (e.g., SSR, secure browser settings)
        router.replace('/admin/secret');
     }
   }, [isAdmin, isRoleLoading, router]);
@@ -73,16 +80,8 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const recentOrders = [
-    { id: 'ORD001', customer: 'Liam Johnson', avatar: 'https://i.pravatar.cc/150?u=liam', status: 'Delivered', total: 250.00 },
-    { id: 'ORD002', customer: 'Olivia Smith', avatar: 'https://i.pravatar.cc/150?u=olivia', status: 'Shipped', total: 150.00 },
-    { id: 'ORD003', customer: 'Noah Williams', avatar: 'https://i.pravatar.cc/150?u=noah', status: 'Processing', total: 350.00 },
-    { id: 'ORD004', customer: 'Emma Brown', avatar: 'https://i.pravatar.cc/150?u=emma', status: 'Pending', total: 450.00 },
-    { id: 'ORD005', customer: 'Ava Jones', avatar: 'https://i.pravatar.cc/150?u=ava', status: 'Canceled', total: 550.00 },
-  ]
   
-  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
+  const getInitials = (name: string | undefined) => (name ? name.split(' ').map(n => n[0]).join('') : 'U');
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6 bg-muted/30">
@@ -155,24 +154,34 @@ export default function AdminDashboard() {
              </Button>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableBody>
-                {recentOrders.slice(0,4).map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage src={order.avatar} alt={order.customer} />
-                          <AvatarFallback>{getInitials(order.customer)}</AvatarFallback>
-                        </Avatar>
-                        <div className="font-medium">{order.customer}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">${order.total.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+             {recentOrdersLoading ? (
+                <div className="space-y-4">
+                  <div className="h-10 bg-muted rounded animate-pulse" />
+                  <div className="h-10 bg-muted rounded animate-pulse" />
+                  <div className="h-10 bg-muted rounded animate-pulse" />
+                </div>
+              ) : (
+                <Table>
+                  <TableBody>
+                    {recentOrders?.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                              <AvatarFallback>{getInitials(order.userName)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <div className="font-medium">{order.userName || 'Guest'}</div>
+                                <div className="text-sm text-muted-foreground">{order.userEmail}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">${order.totalAmount.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
           </CardContent>
         </Card>
       </div>

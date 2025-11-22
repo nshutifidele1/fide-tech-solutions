@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CardElement, useStripe, useElements, Elements } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { PayPalButtons, OnApproveData, OnApproveActions } from '@paypal/react-paypal-js';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Icons } from '@/components/common/icons';
+import { useFirestore, useUser } from '@/firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useCart } from '@/hooks/use-cart';
 
 interface CheckoutFormProps {
   paymentMethod: 'stripe' | 'paypal';
@@ -40,9 +43,13 @@ const StripePaymentForm = ({ totalAmount }: { totalAmount: number }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { clearCart, cartItems } = useCart();
 
   const handleStripeSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!user || !firestore) return;
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -66,15 +73,24 @@ const StripePaymentForm = ({ totalAmount }: { totalAmount: number }) => {
       setIsLoading(false);
     } else {
       console.log('Stripe Token:', token);
-      // Here, you would send the token to your backend to process the payment.
-      // For example:
-      // await fetch('/api/charge', { method: 'POST', body: JSON.stringify({ token: token.id, amount: totalAmount }) });
       
+      const orderData = {
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName || user.email,
+        orderDate: serverTimestamp(),
+        totalAmount: totalAmount,
+        shippingAddress: '123 Main St', // Placeholder
+        orderStatus: 'Processing',
+      };
+      
+      await addDoc(collection(firestore, 'orders'), orderData);
+      
+      clearCart();
       toast({
         title: 'Payment Successful!',
         description: 'Your order has been placed.',
       });
-      // You would typically redirect to an order confirmation page here.
       setIsLoading(false);
     }
   };
@@ -94,6 +110,9 @@ const StripePaymentForm = ({ totalAmount }: { totalAmount: number }) => {
 
 const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
   const { toast } = useToast();
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { clearCart } = useCart();
 
   const handlePayPalCreateOrder = (data: Record<string, unknown>, actions: any) => {
     return actions.order.create({
@@ -104,26 +123,39 @@ const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
             value: totalAmount.toFixed(2),
             currency_code: 'USD',
           },
-          payee: {
-            email_address: "nshutifidele1@gmail.com"
-          }
         },
       ],
     });
   };
 
   const handlePayPalApprove = async (data: OnApproveData, actions: OnApproveActions) => {
-    if (!actions.order) {
+    if (!actions.order || !user || !firestore) {
         toast({ variant: 'destructive', title: 'Error', description: 'PayPal order could not be processed.' });
         return;
     }
     const details = await actions.order.capture();
+
+     const orderData = {
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName || user.email,
+        orderDate: serverTimestamp(),
+        totalAmount: totalAmount,
+        shippingAddress: `${details.payer.name?.given_name} ${details.payer.name?.surname}, ${details.payer.address.address_line_1}`,
+        orderStatus: 'Processing',
+        paymentMethod: 'PayPal',
+        transactionId: details.id,
+      };
+
+    await addDoc(collection(firestore, 'orders'), orderData);
+    
+    clearCart();
+
     console.log('PayPal Order Details:', details);
     toast({
         title: 'Payment Successful!',
         description: `Order ${details.id} has been placed.`,
     });
-    // You would typically redirect to an order confirmation page here.
   };
 
   const handlePayPalError = (err: any) => {
