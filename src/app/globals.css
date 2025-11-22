@@ -53,6 +53,30 @@
     --input: 240 3.7% 15.9%;
     --ring: 262.1 83.3% 57.8%;
   }
+
+  /* Custom styles for admin theme */
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 3.7% 11%;
+    --card-foreground: 0 0% 98%;
+    --primary: 250 78% 66%; /* Brighter purple */
+  }
+
+  body[class*="admin"] {
+    --background: 240 4.8% 95.9%; /* Lighter gray for admin */
+    --card: 0 0% 100%;
+    --muted: 240 5% 90%;
+    --primary: 250 78% 66%;
+  }
+
+  .dark body[class*="admin"] {
+     --background: 240, 10%, 3.9%;
+     --foreground: 0 0% 98%;
+     --card: 240 3.7% 11%;
+     --muted: 240 3.7% 15.9%;
+  }
+
 }
 
 @layer base {

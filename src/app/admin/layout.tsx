@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-muted/40">
+    <div className="flex min-h-screen bg-background">
       <AdminSidebar />
       <main className="flex-1 flex flex-col">
         {children}
