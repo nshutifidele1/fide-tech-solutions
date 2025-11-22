@@ -18,9 +18,9 @@ const navLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/messages', label: 'Inbox', icon: MessageSquare },
   // These are placeholders for now
-  { href: '#', label: 'Invoices', icon: Package },
-  { href: '#', label: 'Customers', icon: Users },
-  { href: '#', label: 'Settings', icon: Settings },
+  { href: '/admin/invoices', label: 'Invoices', icon: Package },
+  { href: '/admin/customers', label: 'Customers', icon: Users },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 const helpLinks = [
@@ -63,7 +63,7 @@ export default function AdminSidebar() {
               href={link.href}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-primary/10 hover:text-primary',
-                pathname.startsWith(link.href) && (pathname === link.href || link.href !== '/admin') && 'bg-primary/10 text-primary font-semibold'
+                pathname === link.href && 'bg-primary/10 text-primary font-semibold'
               )}
             >
               <link.icon className="h-4 w-4" />
