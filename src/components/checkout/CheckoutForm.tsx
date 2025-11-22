@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { PayPalButtons, OnApproveData, OnApproveActions } from '@paypal/react-paypal-js';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +34,7 @@ const cardElementOptions = {
   }
 };
 
-const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
+const StripePaymentForm = ({ totalAmount }: { totalAmount: number }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -78,7 +78,23 @@ const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
       setIsLoading(false);
     }
   };
-  
+
+  return (
+    <form onSubmit={handleStripeSubmit} className="space-y-4">
+      <CardElement options={cardElementOptions} />
+      {errorMessage && <p className="text-sm font-medium text-destructive">{errorMessage}</p>}
+      <Button type="submit" className="w-full" disabled={!stripe || isLoading}>
+        {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Pay ${totalAmount.toFixed(2)}
+      </Button>
+    </form>
+  );
+};
+
+
+const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
+  const { toast } = useToast();
+
   const handlePayPalCreateOrder = (data: Record<string, unknown>, actions: any) => {
     return actions.order.create({
       purchase_units: [
@@ -113,16 +129,7 @@ const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
   };
 
   if (paymentMethod === 'stripe') {
-    return (
-      <form onSubmit={handleStripeSubmit} className="space-y-4">
-        <CardElement options={cardElementOptions} />
-        {errorMessage && <p className="text-sm font-medium text-destructive">{errorMessage}</p>}
-        <Button type="submit" className="w-full" disabled={!stripe || isLoading}>
-          {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Pay ${totalAmount.toFixed(2)}
-        </Button>
-      </form>
-    );
+    return <StripePaymentForm totalAmount={totalAmount} />;
   }
 
   if (paymentMethod === 'paypal') {
