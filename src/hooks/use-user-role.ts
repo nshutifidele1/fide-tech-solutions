@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -16,7 +15,10 @@ export function useUserRole() {
 
   const { data: roleDoc, isLoading: isRoleLoading } = useDoc(roleDocRef);
 
-  const isAdmin = !!roleDoc;
+  const isHardcodedAdmin = user?.email === 'fidelenshuti278@gmail.com';
+  const isAdminInFirestore = !!roleDoc;
+  
+  const isAdmin = isHardcodedAdmin || isAdminInFirestore;
 
   return {
     user,

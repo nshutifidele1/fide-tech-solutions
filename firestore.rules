@@ -5,7 +5,7 @@
  * This ruleset enforces a role-based access control system combined with user-ownership for data privacy.
  * User data and related subcollections (cart items, orders, reviews) are strictly controlled, allowing only the authenticated user and admins access.
  * Public data, such as product information, is readable by all, but write access is restricted.
- * Admin privileges, managed via the `/roles_admin/{userId}` collection, grant elevated permissions.
+ * Admin privileges, managed via the `/roles_admin/{userId}` collection or a hardcoded email, grant elevated permissions.
  *
  * Data Structure:
  * - /products/{productId}: Publicly readable product information.
@@ -21,7 +21,7 @@
  *
  * Key Security Decisions:
  * - User listing is disallowed to protect privacy.
- * - Admin privileges are checked via document existence in the `/roles_admin/{userId}` collection for simplicity and performance.
+ * - Admin privileges are checked via document existence in the `/roles_admin/{userId}` collection or by a hardcoded email for simplicity and performance.
  * - The `isAdmin` field is denormalized into the user document for authorization independence.
  * - Default security posture is strict: any access not explicitly allowed is denied.
  * - To create simpler, more performant rules, roles, and ownership are denormalized onto the documents being secured.
@@ -30,8 +30,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isHardcodedAdmin() {
+      return request.auth != null && request.auth.token.email == 'fidelenshuti278@gmail.com';
+    }
+
     function isAdmin() {
-      return request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || isHardcodedAdmin();
     }
 
     match /products/{productId} {
