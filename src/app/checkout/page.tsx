@@ -1,14 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+'use client';
 
-export const metadata = {
-  title: 'Checkout - Setso',
+import { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import CheckoutForm from '@/components/checkout/CheckoutForm';
+import { useCart } from '@/hooks/use-cart';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+
+// Use a placeholder for your Stripe publishable key
+const stripePromise = loadStripe('YOUR_STRIPE_PUBLISHABLE_KEY');
+
+// Use a placeholder for your PayPal client ID
+const paypalInitialOptions = {
+  'client-id': 'YOUR_PAYPAL_CLIENT_ID',
+  currency: 'USD',
+  intent: 'capture',
 };
 
 export default function CheckoutPage() {
+  const { cartTotal, cartCount, cartItems } = useCart();
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | null>(null);
+
+  if (cartCount === 0) {
+    return (
+      <div className="container py-12 md:py-20 text-center">
+        <h1 className="text-2xl font-bold">Your Cart is Empty</h1>
+        <p className="text-muted-foreground mt-2">Add some products before you can check out.</p>
+        <Button asChild className="mt-6">
+          <Link href="/products">Continue Shopping</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-12 md:py-20">
       <div className="mx-auto max-w-4xl">
@@ -16,92 +44,56 @@ export default function CheckoutPage() {
           Checkout
         </h1>
 
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          <div className="md:col-span-1">
             <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Shipping Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" placeholder="you@example.com" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="John" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Doe" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input id="address" placeholder="123 Main St" />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                   <div className="space-y-2 col-span-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" placeholder="Anytown" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="zip">ZIP Code</Label>
-                    <Input id="zip" placeholder="12345" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Payment Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                 <div className="space-y-2">
-                  <Label htmlFor="card-number">Card Number</Label>
-                  <Input id="card-number" placeholder="**** **** **** 1234" />
-                </div>
-                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input id="expiry" placeholder="MM / YY" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvc">CVC</Label>
-                    <Input id="cvc" placeholder="123" />
-                  </div>
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="name-on-card">Name on Card</Label>
-                  <Input id="name-on-card" placeholder="John M. Doe" />
-                </div>
-              </CardContent>
-            </Card>
-            
-             <Card className="mt-8">
               <CardHeader>
                 <CardTitle className="font-headline">Order Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* This would be populated dynamically */}
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>QuantumCore i9 Gaming Desktop x 1</span>
-                  <span>$2,499.99</span>
+                <div className="space-y-3">
+                  {cartItems.map(item => (
+                    <div key={item.product.id} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground truncate pr-4">{item.product.name} x {item.quantity}</span>
+                      <span className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
                 </div>
-                 <Separator className="my-4" />
-                 <div className="flex justify-between font-bold">
+                <Separator className="my-4" />
+                <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>$2,499.99</span>
+                  <span>${cartTotal.toFixed(2)}</span>
                 </div>
               </CardContent>
             </Card>
-            
-            <Button size="lg" className="w-full mt-8">
-              Place Order
-            </Button>
+          </div>
+          <div className="md:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Payment Method</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                    <h3 className="font-semibold mb-2 text-lg">Pay with Credit Card</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Securely enter your card details. We do not store your card information.
+                    </p>
+                    <Elements stripe={stripePromise}>
+                      <CheckoutForm paymentMethod="stripe" totalAmount={cartTotal} />
+                    </Elements>
+                </div>
+                <Separator />
+                <div>
+                   <h3 className="font-semibold mb-2 text-lg">Pay with PayPal</h3>
+                   <p className="text-sm text-muted-foreground mb-4">
+                      Checkout securely using your PayPal account.
+                    </p>
+                  <PayPalScriptProvider options={paypalInitialOptions}>
+                    <CheckoutForm paymentMethod="paypal" totalAmount={cartTotal} />
+                  </PayPalScriptProvider>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
