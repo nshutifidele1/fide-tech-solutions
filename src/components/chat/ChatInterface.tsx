@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, addDoc, serverTimestamp, query, orderBy, doc, setDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const messagesQuery = useMemo(() => {
+  const messagesQuery = useMemoFirebase(() => {
     if (!firestore || !conversationId) return null;
     return query(
       collection(firestore, 'conversations', conversationId, 'messages'),
