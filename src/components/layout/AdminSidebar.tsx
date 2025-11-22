@@ -3,10 +3,6 @@ import Link from 'next/link';
 import {
   LayoutDashboard,
   MessageSquare,
-  Users,
-  Package,
-  Settings,
-  LifeBuoy,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -17,14 +13,6 @@ import Logo from '../common/Logo';
 const navLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/messages', label: 'Inbox', icon: MessageSquare },
-  // These are placeholders for now
-  { href: '/admin/invoices', label: 'Invoices', icon: Package },
-  { href: '/admin/customers', label: 'Customers', icon: Users },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-];
-
-const helpLinks = [
-  { href: '#', label: 'Support', icon: LifeBuoy },
 ];
 
 export default function AdminSidebar() {
@@ -70,19 +58,6 @@ export default function AdminSidebar() {
               {link.label}
             </Link>
           ))}
-        </nav>
-
-        <nav className="space-y-1 px-4 py-4 border-t">
-            {helpLinks.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted/50 hover:text-foreground"
-                >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-                </Link>
-            ))}
         </nav>
       </div>
     </aside>
