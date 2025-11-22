@@ -1,11 +1,17 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getProducts, getReviewsForProduct } from '@/lib/products';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
 import StarRating from '@/components/common/StarRating';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AddToCartButton from '@/components/products/AddToCartButton';
 import { Separator } from '@/components/ui/separator';
+import type { Product, Review } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type ProductPageProps = {
   params: {
@@ -13,27 +19,78 @@ type ProductPageProps = {
   };
 };
 
-export async function generateStaticParams() {
-  const products = getProducts();
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
-}
-
-export async function generateMetadata({ params }: ProductPageProps) {
-  const product = getProductBySlug(params.slug);
-  if (!product) {
-    return { title: 'Product Not Found' };
-  }
-  return {
-    title: `${product.name} - Setso`,
-    description: product.description,
-  };
-}
-
 export default function ProductPage({ params }: ProductPageProps) {
-  const product = getProductBySlug(params.slug);
-  const reviews = getReviewsForProduct(product?.id || '');
+  const firestore = useFirestore();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!firestore) return;
+    
+    const fetchProduct = async () => {
+      setIsLoading(true);
+      try {
+        const productsRef = collection(firestore, 'products');
+        const q = query(productsRef, where('slug', '==', params.slug));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          notFound();
+          return;
+        }
+
+        const productDoc = querySnapshot.docs[0];
+        const productData = { id: productDoc.id, ...productDoc.data() } as Product;
+        setProduct(productData);
+
+        // Fetch reviews
+        if (productData.id) {
+          const reviewsRef = collection(firestore, `products/${productData.id}/reviews`);
+          const reviewsSnapshot = await getDocs(reviewsRef);
+          const fetchedReviews = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+          setReviews(fetchedReviews);
+        }
+
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        notFound();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [firestore, params.slug]);
+
+  if (isLoading) {
+    return (
+        <div className="container py-12 md:py-20">
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
+                <div>
+                    <Skeleton className="aspect-square w-full rounded-lg" />
+                    <div className="mt-4 grid grid-cols-3 gap-4">
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                    </div>
+                </div>
+                <div className="flex flex-col gap-6">
+                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-12 w-3/4" />
+                    <Skeleton className="h-10 w-1/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-20 w-full" />
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-40" />
+                        <Skeleton className="h-6 w-24" />
+                    </div>
+                     <Skeleton className="h-48 w-full" />
+                </div>
+            </div>
+        </div>
+    );
+  }
 
   if (!product) {
     notFound();
@@ -53,7 +110,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             />
           </div>
           <div className="mt-4 grid grid-cols-3 gap-4">
-             {product.gallery.map((img) => (
+             {product.gallery?.map((img) => (
                <div key={img.id} className="aspect-square relative w-full overflow-hidden rounded-md border">
                  <Image src={img.imageUrl} alt={img.description} fill className="object-cover" data-ai-hint={img.imageHint} />
                </div>
@@ -88,7 +145,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm">
-                {Object.entries(product.specifications).map(([key, value]) => (
+                {product.specifications && Object.entries(product.specifications).map(([key, value]) => (
                   <li key={key} className="flex justify-between">
                     <span className="text-muted-foreground">{key}</span>
                     <span className="font-medium text-right">{value}</span>
@@ -107,7 +164,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             reviews.map((review, index) => (
               <div key={review.id}>
                 <div className="flex items-center gap-4">
-                  <Image src={review.avatar} alt={review.author} width={40} height={40} className="rounded-full" />
+                  {review.avatar && <Image src={review.avatar} alt={review.author} width={40} height={40} className="rounded-full" />}
                   <div>
                     <p className="font-semibold">{review.author}</p>
                     <StarRating rating={review.rating} />

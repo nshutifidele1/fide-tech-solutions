@@ -1,13 +1,20 @@
-import { getProducts } from '@/lib/products';
-import ProductCard from '@/components/products/ProductCard';
+'use client';
 
-export const metadata = {
-  title: 'All Products - Setso',
-  description: 'Browse our full catalog of computers, routers, switches, and more.',
-};
+import ProductCard from '@/components/products/ProductCard';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, DocumentData } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductsPage() {
-  const products = getProducts();
+  const firestore = useFirestore();
+
+  const productsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'products'));
+  }, [firestore]);
+
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   return (
     <div className="bg-background">
@@ -20,11 +27,20 @@ export default function ProductsPage() {
             Explore our curated collection of high-performance tech and networking gear.
           </p>
         </div>
-        
+
         {/* TODO: Add filtering component here */}
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-          {products.map((product) => (
+          {isLoading && (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-1/4" />
+              </div>
+            ))
+          )}
+          {products?.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

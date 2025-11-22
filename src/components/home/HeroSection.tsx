@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Dot } from 'lucide-react';
-import { getFeaturedProducts } from '@/lib/products';
 import type { Product } from '@/lib/types';
 import {
   Carousel,
@@ -13,11 +12,22 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, limit } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function HeroSection() {
-  const featuredProducts = getFeaturedProducts().slice(0, 4); // Limit to 4 for hero
+  const firestore = useFirestore();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+
+  const featuredProductsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'products'), limit(4));
+  }, [firestore]);
+
+  const { data: featuredProducts, isLoading } = useCollection<Product>(featuredProductsQuery);
+
 
   useEffect(() => {
     if (!api) {
@@ -46,6 +56,14 @@ export default function HeroSection() {
     },
     [api]
   );
+  
+  if (isLoading) {
+    return <Skeleton className="relative w-full h-[70vh] md:h-[85vh]" />;
+  }
+
+  if (!featuredProducts || featuredProducts.length === 0) {
+    return null; // Or a placeholder if no products are featured
+  }
 
   return (
     <section className="relative w-full h-[70vh] md:h-[85vh]">
@@ -55,7 +73,7 @@ export default function HeroSection() {
         className="w-full h-full"
       >
         <CarouselContent className="h-full">
-          {featuredProducts.map((product) => (
+          {featuredProducts.map((product, index) => (
             <CarouselItem key={product.id} className="h-full">
               <div className="relative w-full h-full">
                 <Image
@@ -63,7 +81,7 @@ export default function HeroSection() {
                   alt={product.name}
                   fill
                   className="object-cover"
-                  priority={product.id === featuredProducts[0].id}
+                  priority={index === 0}
                   data-ai-hint={product.image.imageHint}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
