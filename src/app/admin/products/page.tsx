@@ -50,6 +50,7 @@ const productSchema = z.object({
   stock: z.preprocess((a) => parseInt(z.string().parse(a), 10), z.number().int().min(0, 'Stock cannot be negative')),
   category: z.string().min(1, 'Category is required'),
   brand: z.string().min(1, 'Brand is required'),
+  imageUrl: z.string().url('Must be a valid URL'),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -73,7 +74,7 @@ export default function AdminProductsPage() {
 
   const openAddDialog = () => {
     setEditingProduct(null);
-    reset({ name: '', description: '', price: 0, stock: 0, category: '', brand: '' });
+    reset({ name: '', description: '', price: 0, stock: 0, category: '', brand: '', imageUrl: '' });
     setIsDialogOpen(true);
   };
 
@@ -86,6 +87,7 @@ export default function AdminProductsPage() {
       stock: product.stock,
       category: product.category,
       brand: product.brand,
+      imageUrl: product.image.imageUrl,
     });
     setIsDialogOpen(true);
   };
@@ -93,21 +95,30 @@ export default function AdminProductsPage() {
   const onSubmit = async (data: ProductFormData) => {
     if (!firestore) return;
     try {
+      const { imageUrl, ...productData } = data;
+      const imageData = {
+        id: editingProduct?.image.id || new Date().toISOString(),
+        imageUrl: imageUrl,
+        description: data.name,
+        imageHint: data.category.toLowerCase(),
+      };
+
       if (editingProduct) {
         // Update existing product
         const productRef = doc(firestore, 'products', editingProduct.id);
-        await updateDoc(productRef, data);
+        await updateDoc(productRef, {
+          ...productData,
+          image: imageData,
+        });
         toast({ title: 'Success', description: 'Product updated successfully.' });
       } else {
         // Add new product
-        // Note: For a real app, image upload would be handled here.
-        // We'll use a placeholder for now.
         const newProductData = {
-          ...data,
+          ...productData,
           slug: data.name.toLowerCase().replace(/\s+/g, '-'),
           rating: 0,
           reviewsCount: 0,
-          image: { id: "placeholder", imageUrl: 'https://placehold.co/600x600', description: 'placeholder', imageHint: 'product placeholder' },
+          image: imageData,
           gallery: [],
           specifications: {},
           features: []
@@ -256,6 +267,11 @@ export default function AdminProductsPage() {
                   <Input id="brand" {...register('brand')} />
                   {errors.brand && <p className="text-sm text-destructive">{errors.brand.message}</p>}
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input id="imageUrl" {...register('imageUrl')} placeholder="https://example.com/image.png"/>
+                {errors.imageUrl && <p className="text-sm text-destructive">{errors.imageUrl.message}</p>}
               </div>
             </div>
             <DialogFooter>

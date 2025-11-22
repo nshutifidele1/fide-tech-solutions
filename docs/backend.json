@@ -52,7 +52,6 @@
         "price",
         "stockQuantity",
         "category",
-        "brand",
         "specifications"
       ]
     },
