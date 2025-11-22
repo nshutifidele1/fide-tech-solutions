@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, updateDoc, deleteDoc, doc, DocumentData } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -42,6 +42,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { Icons } from '@/components/common/icons';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -54,6 +55,16 @@ const productSchema = z.object({
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
+
+interface Brand extends DocumentData {
+  id: string;
+  name: string;
+}
+
+interface Category extends DocumentData {
+  id: string;
+  name: string;
+}
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
@@ -69,8 +80,20 @@ export default function AdminProductsPage() {
     if (!firestore) return null;
     return query(collection(firestore, 'products'), orderBy('name'));
   }, [firestore]);
+  
+  const brandsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'brands'), orderBy('name'));
+  }, [firestore]);
+
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'categories'), orderBy('name'));
+  }, [firestore]);
 
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const { data: brands, isLoading: brandsLoading } = useCollection<Brand>(brandsQuery);
+  const { data: categories, isLoading: categoriesLoading } = useCollection<Category>(categoriesQuery);
 
   const openAddDialog = () => {
     setEditingProduct(null);
@@ -259,12 +282,42 @@ export default function AdminProductsPage() {
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Input id="category" {...register('category')} />
+                  <Controller
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select a category"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="brand">Brand</Label>
-                  <Input id="brand" {...register('brand')} />
+                   <Controller
+                    name="brand"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={brandsLoading ? "Loading..." : "Select a brand"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brands?.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   {errors.brand && <p className="text-sm text-destructive">{errors.brand.message}</p>}
                 </div>
               </div>
@@ -289,3 +342,5 @@ export default function AdminProductsPage() {
     </div>
   );
 }
+
+    

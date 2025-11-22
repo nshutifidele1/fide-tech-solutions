@@ -18,6 +18,8 @@
  * - /roles_admin/{userId}: Indicates admin privileges; presence of a document grants admin status.
  * - /conversations/{conversationId}: Chat metadata, readable by participants or admins.
  * - /conversations/{conversationId}/messages/{messageId}: Chat messages, readable/writable by participants or admins.
+ * - /categories/{categoryId}: Product categories, readable by all, writable by admins.
+ * - /brands/{brandId}: Product brands, readable by all, writable by admins.
  *
  * Key Security Decisions:
  * - User listing is disallowed to protect privacy, except for admins.
@@ -39,6 +41,16 @@ service cloud.firestore {
     }
 
     match /products/{productId} {
+      allow read;
+      allow write: if isAdmin();
+    }
+    
+    match /categories/{categoryId} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    match /brands/{brandId} {
       allow read;
       allow write: if isAdmin();
     }
@@ -95,3 +107,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

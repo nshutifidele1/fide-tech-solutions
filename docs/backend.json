@@ -52,7 +52,8 @@
         "price",
         "stockQuantity",
         "category",
-        "specifications"
+        "specifications",
+        "brand"
       ]
     },
     "User": {
@@ -347,6 +348,40 @@
         }
       },
       "required": ["senderId", "text", "timestamp"]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a product category.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the category."
+        }
+      },
+      "required": ["id", "name"]
+    },
+    "Brand": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Brand",
+      "type": "object",
+      "description": "Represents a product brand.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the brand."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the brand."
+        }
+      },
+      "required": ["id", "name"]
     }
   },
   "auth": {
@@ -532,8 +567,41 @@
             }
           ]
         }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores product categories.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/brands/{brandId}",
+        "definition": {
+          "entityName": "Brand",
+          "schema": {
+            "$ref": "#/backend/entities/Brand"
+          },
+          "description": "Stores product brands.",
+          "params": [
+            {
+              "name": "brandId",
+              "description": "The unique identifier for the brand."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support NetTech Solutions' e-commerce platform, focusing on products, users, orders, reviews, and newsletter subscriptions. Authorization Independence is achieved by storing the `isAdmin` field directly within the user document, eliminating the need for `get()` calls to determine administrative privileges. This approach ensures atomic operations and simplifies security rules. User-owned data (cart items, reviews) is stored in hierarchical paths under the `/users/{userId}` collection, providing clear ownership and simplifying security rules based on the authenticated user's ID. All orders are stored in a top-level `/orders` collection to allow administrators to efficiently query and aggregate revenue data. The structure supports the required QAPs by segregating data based on access needs. User profiles are stored under `/users/{userId}`, ensuring only the user can access their data. Products are stored in a flat `/products` collection, allowing easy listing and filtering for all users. Admin roles are managed through the `isAdmin` field in the user document and existence check on the `/roles_admin/{uid}` collection, making role verification straightforward in security rules. Newsletter subscriptions are stored in the `/newsletter_subscriptions` collection. The addition of a `conversations` collection with a `messages` subcollection enables a real-time chat feature between users and admins, with rules ensuring only participants can access their own messages."
+    "reasoning": "The Firestore structure is designed to support NetTech Solutions' e-commerce platform, focusing on products, users, orders, reviews, and newsletter subscriptions. Authorization Independence is achieved by storing the `isAdmin` field directly within the user document, eliminating the need for `get()` calls to determine administrative privileges. This approach ensures atomic operations and simplifies security rules. User-owned data (cart items, reviews) is stored in hierarchical paths under the `/users/{userId}` collection, providing clear ownership and simplifying security rules based on the authenticated user's ID. All orders are stored in a top-level `/orders` collection to allow administrators to efficiently query and aggregate revenue data. The structure supports the required QAPs by segregating data based on access needs. User profiles are stored under `/users/{userId}`, ensuring only the user can access their data. Products are stored in a flat `/products` collection, allowing easy listing and filtering for all users. Admin roles are managed through the `isAdmin` field in the user document and existence check on the `/roles_admin/{uid}` collection, making role verification straightforward in security rules. Newsletter subscriptions are stored in the `/newsletter_subscriptions` collection. The addition of a `conversations` collection with a `messages` subcollection enables a real-time chat feature between users and admins, with rules ensuring only participants can access their own messages. Dedicated collections for `categories` and `brands` are added to ensure data consistency and allow for centralized management."
   }
 }
+    
