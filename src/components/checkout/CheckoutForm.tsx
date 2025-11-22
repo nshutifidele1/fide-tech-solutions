@@ -118,7 +118,7 @@ const CheckoutForm = ({ paymentMethod, totalAmount }: CheckoutFormProps) => {
     return actions.order.create({
       purchase_units: [
         {
-          description: "Your order from Setso",
+          description: "Your order from Fide Tech Solutions",
           amount: {
             value: totalAmount.toFixed(2),
             currency_code: 'USD',

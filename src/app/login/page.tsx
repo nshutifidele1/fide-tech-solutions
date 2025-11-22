@@ -7,8 +7,8 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Logo from '@/components/common/Logo';
 
 export const metadata: Metadata = {
-  title: 'Login - Setso',
-  description: 'Login to your Setso account.',
+  title: 'Login - Fide Tech Solutions',
+  description: 'Login to your Fide Tech Solutions account.',
 };
 
 export default function LoginPage() {

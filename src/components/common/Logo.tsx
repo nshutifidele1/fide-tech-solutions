@@ -7,8 +7,8 @@ export default function Logo() {
       <div className="rounded-full bg-primary p-2">
          <Package className="h-5 w-5 text-primary-foreground" />
       </div>
-      <span className="font-headline text-2xl font-bold text-foreground">
-        Setso
+      <span className="font-headline text-xl font-bold text-foreground">
+        Fide Tech
       </span>
     </Link>
   );

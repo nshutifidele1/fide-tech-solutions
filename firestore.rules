@@ -1,5 +1,5 @@
 /**
- * @fileoverview Firestore Security Rules for NetTech Solutions.
+ * @fileoverview Firestore Security Rules for Fide Tech Solutions.
  *
  * Core Philosophy:
  * This ruleset enforces a role-based access control system combined with user-ownership for data privacy.
@@ -107,5 +107,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

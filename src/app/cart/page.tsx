@@ -1,7 +1,7 @@
 import CartClientPage from './CartClientPage';
 
 export const metadata = {
-  title: 'Your Cart - Setso',
+  title: 'Your Cart - Fide Tech Solutions',
   description: 'Review items in your shopping cart and proceed to checkout.',
 };
 

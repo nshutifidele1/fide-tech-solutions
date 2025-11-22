@@ -8,7 +8,7 @@ import type { Product } from '@/lib/types';
 
 
 export const metadata = {
-  title: 'Search Results - Setso',
+  title: 'Search Results - Fide Tech Solutions',
 };
 
 type SearchPageProps = {

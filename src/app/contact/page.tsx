@@ -193,8 +193,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Email</h3>
-                <p className="text-muted-foreground">General Inquiries: <a href="mailto:contact@setso.com" className="text-primary hover:underline">contact@setso.com</a></p>
-                <p className="text-muted-foreground">Support: <a href="mailto:support@setso.com" className="text-primary hover:underline">support@setso.com</a></p>
+                <p className="text-muted-foreground">General Inquiries: <a href="mailto:contact@fidetech.com" className="text-primary hover:underline">contact@fidetech.com</a></p>
+                <p className="text-muted-foreground">Support: <a href="mailto:support@fidetech.com" className="text-primary hover:underline">support@fidetech.com</a></p>
               </div>
             </div>
              <div className="flex items-start gap-4">

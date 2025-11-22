@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'Setso',
+  title: 'Fide Tech Solutions',
   description: 'Your one-stop shop for computers, networking, and tech devices.',
 };
 
