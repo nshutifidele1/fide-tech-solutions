@@ -275,6 +275,69 @@
         "email",
         "subscribeDate"
       ]
+    },
+    "Conversation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Conversation",
+      "type": "object",
+      "description": "Represents a chat conversation between a user and an admin.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user in the conversation."
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "The email of the user."
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array containing the UIDs of the user and admin."
+        },
+        "lastMessage": {
+          "type": "string",
+          "description": "The content of the most recent message."
+        },
+        "lastMessageAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last message."
+        },
+        "lastMessageSenderId": {
+          "type": "string",
+          "description": "The UID of the sender of the last message."
+        },
+        "isReadByAdmin": {
+          "type": "boolean",
+          "description": "Indicates if the last message has been read by the admin."
+        }
+      },
+      "required": ["userId", "userEmail", "participants", "lastMessage", "lastMessageAt", "lastMessageSenderId", "isReadByAdmin"]
+    },
+    "Message": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Message",
+      "type": "object",
+      "description": "Represents a single message within a conversation.",
+      "properties": {
+        "senderId": {
+          "type": "string",
+          "description": "The UID of the message sender."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the message was sent."
+        }
+      },
+      "required": ["senderId", "text", "timestamp"]
     }
   },
   "auth": {
@@ -428,8 +491,45 @@
             }
           ]
         }
+      },
+       {
+        "path": "/conversations/{conversationId}",
+        "definition": {
+          "entityName": "Conversation",
+          "schema": {
+            "$ref": "#/backend/entities/Conversation"
+          },
+          "description": "Represents a chat conversation metadata. Accessible by participants and admins.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique identifier for the conversation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}/messages/{messageId}",
+        "definition": {
+          "entityName": "Message",
+          "schema": {
+            "$ref": "#/backend/entities/Message"
+          },
+          "description": "Stores individual messages within a conversation. Accessible only by participants and admins.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique identifier for the conversation."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier for the message."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support NetTech Solutions' e-commerce platform, focusing on products, users, orders, reviews, and newsletter subscriptions. Authorization Independence is achieved by storing the `isAdmin` field directly within the user document, eliminating the need for `get()` calls to determine administrative privileges. This approach ensures atomic operations and simplifies security rules. User-owned data (cart items, orders, reviews) is stored in hierarchical paths under the `/users/{userId}` collection, providing clear ownership and simplifying security rules based on the authenticated user's ID. The structure supports the required QAPs by segregating data based on access needs. User profiles are stored under `/users/{userId}`, ensuring only the user can access their data. Products are stored in a flat `/products` collection, allowing easy listing and filtering for all users. Admin roles are managed through the `isAdmin` field in the user document and existence check on the `/roles_admin/{uid}` collection, making role verification straightforward in security rules. Newsletter subscriptions are stored in the `/newsletter_subscriptions` collection. Overall, this structure balances security, scalability, and ease of querying, aligning with best practices for Firestore development."
+    "reasoning": "The Firestore structure is designed to support NetTech Solutions' e-commerce platform, focusing on products, users, orders, reviews, and newsletter subscriptions. Authorization Independence is achieved by storing the `isAdmin` field directly within the user document, eliminating the need for `get()` calls to determine administrative privileges. This approach ensures atomic operations and simplifies security rules. User-owned data (cart items, orders, reviews) is stored in hierarchical paths under the `/users/{userId}` collection, providing clear ownership and simplifying security rules based on the authenticated user's ID. The structure supports the required QAPs by segregating data based on access needs. User profiles are stored under `/users/{userId}`, ensuring only the user can access their data. Products are stored in a flat `/products` collection, allowing easy listing and filtering for all users. Admin roles are managed through the `isAdmin` field in the user document and existence check on the `/roles_admin/{uid}` collection, making role verification straightforward in security rules. Newsletter subscriptions are stored in the `/newsletter_subscriptions` collection. The addition of a `conversations` collection with a `messages` subcollection enables a real-time chat feature between users and admins, with rules ensuring only participants can access their own messages."
   }
 }
+    
