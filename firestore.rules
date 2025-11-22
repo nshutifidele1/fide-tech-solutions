@@ -3,7 +3,7 @@
  *
  * Core Philosophy:
  * This ruleset enforces a role-based access control system combined with user-ownership for data privacy.
- * User data and related subcollections (cart items, orders, reviews) are strictly controlled, allowing only the authenticated user and admins access.
+ * User data and related subcollections (cart items, reviews) are strictly controlled, allowing only the authenticated user and admins access.
  * Public data, such as product information, is readable by all, but write access is restricted.
  * Admin privileges, managed via the `/roles_admin/{userId}` collection or a hardcoded email, grant elevated permissions.
  *
@@ -11,7 +11,7 @@
  * - /products/{productId}: Publicly readable product information.
  * - /users/{userId}: User profile data; write access restricted to the user and admins.
  * - /users/{userId}/cart_items/{cartItemId}: Cart items owned by the user.
- * - /users/{userId}/orders/{orderId}: Order history for the user.
+ * - /orders/{orderId}: All orders. Readable by the user who owns it or by any admin.
  * - /orders/{orderId}/order_items/{orderItemId}: Items within a specific order.
  * - /users/{userId}/reviews/{reviewId}: Product reviews created by the user.
  * - /newsletter_subscriptions/{subscriptionId}: Newsletter subscriptions; publicly creatable, restricted otherwise.
@@ -53,10 +53,13 @@ service cloud.firestore {
         allow read, write: if request.auth.uid == userId;
     }
 
-    match /users/{userId}/orders/{orderId} {
-        allow read, write: if request.auth.uid == userId;
+    match /orders/{orderId} {
+        allow read: if request.auth.uid == resource.data.userId || isAdmin();
+        allow list: if isAdmin();
+        allow create: if request.auth != null;
+        allow update, delete: if isAdmin();
     }
-
+    
     match /users/{userId}/reviews/{reviewId} {
         allow read, write: if request.auth.uid == userId;
     }

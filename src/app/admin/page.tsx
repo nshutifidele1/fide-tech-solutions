@@ -15,11 +15,28 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+
+interface Order {
+  id: string;
+  totalAmount: number;
+}
 
 export default function AdminDashboard() {
   const { isAdmin, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(false);
+  const firestore = useFirestore();
+
+  const ordersQuery = useMemoFirebase(() => {
+    if (!firestore || !isAdmin) return null;
+    return query(collection(firestore, 'orders'));
+  }, [firestore, isAdmin]);
+
+  const { data: orders, isLoading: ordersLoading } = useCollection<Order>(ordersQuery);
+
+  const totalRevenue = orders?.reduce((acc, order) => acc + order.totalAmount, 0) ?? 0;
 
   useEffect(() => {
     if (isRoleLoading) return; // Wait until role check is complete
@@ -72,8 +89,12 @@ export default function AdminDashboard() {
             <DollarSign className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold">$45,231.89</div>
-            <p className="text-xs text-primary/80">+20.1% from last month</p>
+            {ordersLoading ? (
+               <div className="text-4xl font-bold animate-pulse">...</div>
+            ) : (
+              <div className="text-4xl font-bold">${totalRevenue.toFixed(2)}</div>
+            )}
+            <p className="text-xs text-primary/80">Calculated from all orders</p>
           </CardContent>
         </Card>
         <Card>
@@ -82,8 +103,8 @@ export default function AdminDashboard() {
             <ShoppingCart className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+            <div className="text-4xl font-bold">+{orders?.length ?? 0}</div>
+            <p className="text-xs text-muted-foreground">Total orders placed</p>
           </CardContent>
         </Card>
         <Card>
