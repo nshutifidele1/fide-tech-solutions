@@ -67,7 +67,7 @@ service cloud.firestore {
     }
 
     match /roles_admin/{userId} {
-      allow get: if request.auth.uid == userId;
+      allow get: if request.auth.uid == userId || isAdmin();
       allow list, create, delete: if isAdmin();
       allow update: if false;
     }
@@ -77,7 +77,8 @@ service cloud.firestore {
     }
 
     match /conversations/{conversationId} {
-      allow get, list: if isParticipant(conversationId) || isAdmin();
+      allow get: if isParticipant(conversationId) || isAdmin();
+      allow list: if isAdmin(); // Admins can list all conversations
       allow create: if request.auth != null;
       allow update: if isParticipant(conversationId) || isAdmin();
     }
@@ -87,5 +88,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
