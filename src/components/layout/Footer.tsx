@@ -77,9 +77,12 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Fide Tech Solutions. All Rights Reserved.
-          </p>
+          <div className="text-center sm:text-left">
+            <p className="text-sm text-muted-foreground">
+              &copy; {new Date().getFullYear()} Fide Tech Solutions. All Rights Reserved.
+            </p>
+             <p className="text-sm text-muted-foreground">Developed by Fide Dev</p>
+          </div>
           <div className="flex space-x-4">
             <Link href="#" className="text-muted-foreground hover:text-foreground">
               <Twitter className="h-5 w-5" />
