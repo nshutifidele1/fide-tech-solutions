@@ -9,10 +9,3 @@ const findImage = (id: string, fallbackId: string = 'computer-1') => {
 
 export const products: Product[] = [];
 export const productReviews: { [productId: string]: Review[] } = {};
-
-// getProducts is now deprecated and will be removed.
-// Data should be fetched from Firestore.
-export const getProducts = (): Product[] => products;
-export const getProductBySlug = (slug: string): Product | undefined => products.find((p) => p.slug === slug);
-export const getFeaturedProducts = (): Product[] => products.slice(0, 4);
-export const getReviewsForProduct = (productId: string): Review[] => productReviews[productId] || [];

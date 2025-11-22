@@ -1,8 +1,11 @@
 import { Suspense } from 'react';
 import { intelligentProductSearch } from '@/ai/flows/intelligent-product-search';
-import { getProducts } from '@/lib/products';
 import ProductCard from '@/components/products/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { collection, getDocs, query, where, DocumentData } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
+import type { Product } from '@/lib/types';
+
 
 export const metadata = {
   title: 'Search Results - Setso',
@@ -14,24 +17,34 @@ type SearchPageProps = {
   };
 };
 
-async function SearchResults({ query }: { query: string }) {
-  const allProducts = getProducts();
+async function SearchResults({ query: searchQuery }: { query: string }) {
+  const { firestore } = initializeFirebase();
   let productNames: string[] = [];
 
   try {
-    const result = await intelligentProductSearch({ query });
+    const result = await intelligentProductSearch({ query: searchQuery });
     productNames = result.products;
   } catch (error) {
     console.error('AI search failed:', error);
-    // Fallback or error message could be handled here
   }
 
-  const foundProducts = allProducts.filter((p) =>
-    productNames.some(name => p.name.toLowerCase().includes(name.toLowerCase()))
-  );
+  let foundProducts: Product[] = [];
+  if (productNames.length > 0) {
+     const productsRef = collection(firestore, 'products');
+     // Firestore 'in' query is limited to 30 elements.
+     const q = query(productsRef, where('name', 'in', productNames.slice(0, 30)));
+     const querySnapshot = await getDocs(q);
+     foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  } else {
+    // Fallback for when AI returns no specific product names
+    const productsRef = collection(firestore, 'products');
+    const q = query(productsRef, where('name', '>=', searchQuery), where('name', '<=', searchQuery + '\uf8ff'));
+    const querySnapshot = await getDocs(q);
+    foundProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+  }
 
   if (foundProducts.length === 0) {
-    return <p className="text-center text-muted-foreground">No products found for "{query}". Try a different search.</p>;
+    return <p className="text-center text-muted-foreground">No products found for "{searchQuery}". Try a different search.</p>;
   }
 
   return (
