@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, DocumentData } from 'firebase/firestore';
 
 interface Order {
   id: string;
@@ -34,9 +34,17 @@ export default function AdminDashboard() {
     return query(collection(firestore, 'orders'));
   }, [firestore, isAdmin]);
 
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore || !isAdmin) return null;
+    return query(collection(firestore, 'users'));
+  }, [firestore, isAdmin]);
+
   const { data: orders, isLoading: ordersLoading } = useCollection<Order>(ordersQuery);
+  const { data: users, isLoading: usersLoading } = useCollection<DocumentData>(usersQuery);
 
   const totalRevenue = orders?.reduce((acc, order) => acc + order.totalAmount, 0) ?? 0;
+  const totalUsers = users?.length ?? 0;
+
 
   useEffect(() => {
     if (isRoleLoading) return; // Wait until role check is complete
@@ -103,7 +111,11 @@ export default function AdminDashboard() {
             <ShoppingCart className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
+            {ordersLoading ? (
+               <div className="text-4xl font-bold animate-pulse">...</div>
+            ) : (
             <div className="text-4xl font-bold">+{orders?.length ?? 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">Total orders placed</p>
           </CardContent>
         </Card>
@@ -113,8 +125,12 @@ export default function AdminDashboard() {
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold">+123</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
+             {usersLoading ? (
+               <div className="text-4xl font-bold animate-pulse">...</div>
+            ) : (
+            <div className="text-4xl font-bold">+{totalUsers}</div>
+            )}
+            <p className="text-xs text-muted-foreground">Total registered users</p>
           </CardContent>
         </Card>
       </div>
