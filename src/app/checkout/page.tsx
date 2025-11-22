@@ -23,8 +23,7 @@ const paypalInitialOptions = {
 
 export default function CheckoutPage() {
   const { cartTotal, cartCount, cartItems } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | null>(null);
-
+  
   if (cartCount === 0) {
     return (
       <div className="container py-12 md:py-20 text-center">
