@@ -40,7 +40,7 @@ service cloud.firestore {
 
     match /products/{productId} {
       allow read;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /users/{userId} {
