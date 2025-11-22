@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Icons } from '@/components/common/icons';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 export default function ContactPage() {
   const { user, isUserLoading } = useUser();
@@ -25,13 +27,13 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user) {
+    if (!user || !firestore) {
       toast({
         variant: 'destructive',
         title: 'Authentication Required',
         description: 'You must be logged in to send a message.',
       });
-      router.push('/login');
+      if (!user) router.push('/login');
       return;
     }
 
@@ -46,64 +48,93 @@ export default function ContactPage() {
 
     setIsLoading(true);
 
-    try {
-      const conversationsRef = collection(firestore, 'conversations');
-      const q = query(conversationsRef, where('userId', '==', user.uid));
-      
-      const querySnapshot = await getDocs(q);
-      let conversationId: string;
-
-      if (querySnapshot.empty) {
-        // Create new conversation
-        const newConversationRef = doc(conversationsRef);
-        conversationId = newConversationRef.id;
-        
-        await setDoc(newConversationRef, {
-          userId: user.uid,
-          userEmail: user.email,
-          participants: [user.uid],
-          lastMessage: message,
-          lastMessageAt: serverTimestamp(),
-          lastMessageSenderId: user.uid,
-          isReadByAdmin: false,
-        });
-
-      } else {
-        // Use existing conversation
-        conversationId = querySnapshot.docs[0].id;
-      }
-      
-      const messagesRef = collection(firestore, 'conversations', conversationId, 'messages');
-      await addDoc(messagesRef, {
-        senderId: user.uid,
-        text: `${subject}: ${message}`,
-        timestamp: serverTimestamp(),
+    const conversationsRef = collection(firestore, 'conversations');
+    const q = query(conversationsRef, where('userId', '==', user.uid));
+    
+    const querySnapshot = await getDocs(q).catch((error) => {
+      const contextualError = new FirestorePermissionError({
+        path: 'conversations',
+        operation: 'list',
       });
+      errorEmitter.emit('permission-error', contextualError);
+      setIsLoading(false);
+      // Return null to indicate failure
+      return null;
+    });
 
-      // Update last message on conversation
-      await setDoc(doc(firestore, 'conversations', conversationId), {
+    // If getDocs failed, querySnapshot will be null
+    if (querySnapshot === null) return;
+    
+    let conversationId: string;
+    let isNewConversation = false;
+
+    if (querySnapshot.empty) {
+      isNewConversation = true;
+      const newConversationRef = doc(conversationsRef);
+      conversationId = newConversationRef.id;
+      
+      const conversationData = {
+        userId: user.uid,
+        userEmail: user.email,
+        participants: [user.uid],
         lastMessage: message,
         lastMessageAt: serverTimestamp(),
         lastMessageSenderId: user.uid,
         isReadByAdmin: false,
-      }, { merge: true });
+      };
 
-      toast({
-        title: 'Message Sent!',
-        description: "We've received your message and will get back to you shortly.",
+      await setDoc(newConversationRef, conversationData).catch(error => {
+        const contextualError = new FirestorePermissionError({
+          path: newConversationRef.path,
+          operation: 'create',
+          requestResourceData: conversationData,
+        });
+        errorEmitter.emit('permission-error', contextualError);
+        setIsLoading(false);
       });
 
-      router.push(`/contact/chat`);
-
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not send your message. Please try again later.',
-      });
-      setIsLoading(false);
+    } else {
+      conversationId = querySnapshot.docs[0].id;
     }
+
+    if (isLoading === false) return; // if an error occurred in the setDoc, stop.
+
+    const messagesRef = collection(firestore, 'conversations', conversationId, 'messages');
+    const messageData = {
+      senderId: user.uid,
+      text: `${subject}: ${message}`,
+      timestamp: serverTimestamp(),
+    };
+    await addDoc(messagesRef, messageData).catch(error => {
+      const contextualError = new FirestorePermissionError({
+          path: messagesRef.path,
+          operation: 'create',
+          requestResourceData: messageData,
+        });
+        errorEmitter.emit('permission-error', contextualError);
+    });
+
+    const conversationUpdateData = {
+      lastMessage: message,
+      lastMessageAt: serverTimestamp(),
+      lastMessageSenderId: user.uid,
+      isReadByAdmin: false,
+    };
+    await setDoc(doc(firestore, 'conversations', conversationId), conversationUpdateData, { merge: true }).catch(error => {
+       const contextualError = new FirestorePermissionError({
+          path: `conversations/${conversationId}`,
+          operation: 'update',
+          requestResourceData: conversationUpdateData,
+        });
+        errorEmitter.emit('permission-error', contextualError);
+    });
+
+    toast({
+      title: 'Message Sent!',
+      description: "We've received your message and will get back to you shortly.",
+    });
+
+    router.push(`/contact/chat`);
   };
 
   return (
@@ -195,4 +226,3 @@ export default function ContactPage() {
     </div>
   );
 }
-    

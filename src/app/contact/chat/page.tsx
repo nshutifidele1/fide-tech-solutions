@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useUser, useFirestore } from '@/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useRouter } from 'next/navigation';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 export default function UserChatPage() {
   const { user, isUserLoading } = useUser();
@@ -32,6 +34,11 @@ export default function UserChatPage() {
           setConversationId(querySnapshot.docs[0].id);
         }
       } catch (error) {
+        const contextualError = new FirestorePermissionError({
+            path: 'conversations',
+            operation: 'list'
+        });
+        errorEmitter.emit('permission-error', contextualError);
         console.error("Error finding conversation:", error);
       } finally {
         setIsLoading(false);
@@ -63,7 +70,3 @@ export default function UserChatPage() {
     </div>
   );
 }
-
-// React useState needs to be imported
-import { useState } from 'react';
-    

@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 interface ChatInterfaceProps {
   conversationId: string;
@@ -57,19 +59,36 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
     if (!newMessage.trim() || !user || !firestore) return;
 
     const messagesRef = collection(firestore, 'conversations', conversationId, 'messages');
-    await addDoc(messagesRef, {
+    const messageData = {
       senderId: user.uid,
       text: newMessage,
       timestamp: serverTimestamp(),
+    };
+
+    addDoc(messagesRef, messageData).catch(error => {
+       const contextualError = new FirestorePermissionError({
+          path: messagesRef.path,
+          operation: 'create',
+          requestResourceData: messageData,
+        });
+        errorEmitter.emit('permission-error', contextualError);
     });
 
     const conversationRef = doc(firestore, 'conversations', conversationId);
-    await setDoc(conversationRef, {
+    const conversationData = {
         lastMessage: newMessage,
         lastMessageAt: serverTimestamp(),
         lastMessageSenderId: user.uid,
         isReadByAdmin: false,
-    }, { merge: true });
+    };
+    setDoc(conversationRef, conversationData, { merge: true }).catch(error => {
+        const contextualError = new FirestorePermissionError({
+            path: conversationRef.path,
+            operation: 'update',
+            requestResourceData: conversationData,
+        });
+        errorEmitter.emit('permission-error', contextualError);
+    });
 
     setNewMessage('');
   };
@@ -139,4 +158,3 @@ export default function ChatInterface({ conversationId }: ChatInterfaceProps) {
     </div>
   );
 }
-    
